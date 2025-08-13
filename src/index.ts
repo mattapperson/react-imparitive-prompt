@@ -1,17 +1,18 @@
 // Main library exports
-export { initInput, inputManager } from "./inputManager";
-export { input } from "./helpers"; // Export enhanced input with convenience methods
-export { InputProvider } from "./InputProvider";
+
+export { input } from './helpers' // Export enhanced input with convenience methods
+export { InputProvider } from './InputProvider'
+export { initInput, inputManager } from './inputManager'
 
 // Re-export types
 export type {
-  InputOptions,
+  BaseInputOptions,
   InputConfig,
-  InputRenderer,
-  RendererProps,
-  InputPrompt,
   InputEvents,
+  InputOptions,
+  InputPrompt,
+  InputRenderer,
   InputRenderers,
   MissingRendererPolicy,
-  BaseInputOptions,
-} from "./types";
+  RendererProps,
+} from './types'

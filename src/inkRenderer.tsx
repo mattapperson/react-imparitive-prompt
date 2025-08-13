@@ -1,32 +1,41 @@
 // inkRenderer.tsx
-import React from 'react';
-import { Box, Text } from 'ink';
-import TextInput from 'ink-text-input';
-import type { RendererProps, InputRenderers } from './types';
+
+import { Box, Text } from 'ink'
+import TextInput from 'ink-text-input'
+import React from 'react'
+import type { InputRenderers, RendererProps } from './types'
 
 /** TEXT/EMAIL/PASSWORD share the same component (string in, string out) */
-export function TextInputPrompt({ prompt, queueLength, onSubmit, onCancel }: RendererProps<string>) {
-  const [value, setValue] = React.useState<string>(prompt.defaultValue ?? '');
+export function TextInputPrompt({
+  prompt,
+  queueLength,
+  onSubmit,
+  onCancel,
+}: RendererProps<string>) {
+  const [value, setValue] = React.useState<string>(prompt.defaultValue ?? '')
 
-  const handleSubmit = React.useCallback((inputValue: string) => {
-    if (prompt.required && inputValue.trim() === '') {
-      return; // Don't submit empty required fields
-    }
-    onSubmit(inputValue);
-  }, [prompt.required, onSubmit]);
+  const handleSubmit = React.useCallback(
+    (inputValue: string) => {
+      if (prompt.required && inputValue.trim() === '') {
+        return // Don't submit empty required fields
+      }
+      onSubmit(inputValue)
+    },
+    [prompt.required, onSubmit],
+  )
 
   React.useEffect(() => {
-    const handleKeyPress = (_input: string, key: any) => {
+    const handleKeyPress = (_input: string, key: { escape?: boolean }) => {
       if (key.escape) {
-        onCancel();
+        onCancel()
       }
-    };
+    }
 
-    process.stdin.on('data', handleKeyPress);
+    process.stdin.on('data', handleKeyPress)
     return () => {
-      process.stdin.off('data', handleKeyPress);
-    };
-  }, [onCancel]);
+      process.stdin.off('data', handleKeyPress)
+    }
+  }, [onCancel])
 
   return (
     <Box flexDirection="column">
@@ -37,17 +46,17 @@ export function TextInputPrompt({ prompt, queueLength, onSubmit, onCancel }: Ren
           </Text>
         </Box>
       )}
-      
+
       <Box marginBottom={1}>
         <Text bold>{prompt.message}</Text>
       </Box>
-      
+
       {prompt.placeholder && (
         <Box marginBottom={1}>
           <Text dimColor>({prompt.placeholder})</Text>
         </Box>
       )}
-      
+
       <Box>
         <Text>{'> '}</Text>
         <TextInput
@@ -57,54 +66,62 @@ export function TextInputPrompt({ prompt, queueLength, onSubmit, onCancel }: Ren
           mask={prompt.kind === 'password' ? '*' : undefined}
         />
       </Box>
-      
+
       <Box marginTop={1}>
         <Text dimColor>
           Press Enter to {queueLength > 0 ? 'continue' : 'submit'}, ESC to cancel
         </Text>
       </Box>
     </Box>
-  );
+  )
 }
 
 /** NUMBER prompt returns a number (or null on cancel) */
-export function NumberInputPrompt({ prompt, queueLength, onSubmit, onCancel }: RendererProps<number>) {
-  const [raw, setRaw] = React.useState<string>(String(prompt.defaultValue ?? ''));
+export function NumberInputPrompt({
+  prompt,
+  queueLength,
+  onSubmit,
+  onCancel,
+}: RendererProps<number>) {
+  const [raw, setRaw] = React.useState<string>(String(prompt.defaultValue ?? ''))
 
-  const handleSubmit = React.useCallback((inputValue: string) => {
-    // Empty string is null unless required
-    if (inputValue === '') {
-      if (prompt.required) {
-        return; // Don't submit empty required fields
+  const handleSubmit = React.useCallback(
+    (inputValue: string) => {
+      // Empty string is null unless required
+      if (inputValue === '') {
+        if (prompt.required) {
+          return // Don't submit empty required fields
+        }
+        onCancel() // resolve null
+        return
       }
-      onCancel(); // resolve null
-      return;
-    }
-    
-    const n = Number(inputValue);
-    if (Number.isNaN(n)) {
-      if (prompt.required) {
-        return; // invalid number for required field
+
+      const n = Number(inputValue)
+      if (Number.isNaN(n)) {
+        if (prompt.required) {
+          return // invalid number for required field
+        }
+        onCancel()
+        return
       }
-      onCancel();
-      return;
-    }
-    
-    onSubmit(n);
-  }, [prompt.required, onSubmit, onCancel]);
+
+      onSubmit(n)
+    },
+    [prompt.required, onSubmit, onCancel],
+  )
 
   React.useEffect(() => {
-    const handleKeyPress = (_input: string, key: any) => {
+    const handleKeyPress = (_input: string, key: { escape?: boolean }) => {
       if (key.escape) {
-        onCancel();
+        onCancel()
       }
-    };
+    }
 
-    process.stdin.on('data', handleKeyPress);
+    process.stdin.on('data', handleKeyPress)
     return () => {
-      process.stdin.off('data', handleKeyPress);
-    };
-  }, [onCancel]);
+      process.stdin.off('data', handleKeyPress)
+    }
+  }, [onCancel])
 
   return (
     <Box flexDirection="column">
@@ -115,33 +132,29 @@ export function NumberInputPrompt({ prompt, queueLength, onSubmit, onCancel }: R
           </Text>
         </Box>
       )}
-      
+
       <Box marginBottom={1}>
         <Text bold>{prompt.message}</Text>
       </Box>
-      
+
       {prompt.placeholder && (
         <Box marginBottom={1}>
           <Text dimColor>({prompt.placeholder})</Text>
         </Box>
       )}
-      
+
       <Box>
         <Text>{'> '}</Text>
-        <TextInput
-          value={raw}
-          onChange={setRaw}
-          onSubmit={handleSubmit}
-        />
+        <TextInput value={raw} onChange={setRaw} onSubmit={handleSubmit} />
       </Box>
-      
+
       <Box marginTop={1}>
         <Text dimColor>
           Enter a number. Press Enter to {queueLength > 0 ? 'continue' : 'submit'}, ESC to cancel
         </Text>
       </Box>
     </Box>
-  );
+  )
 }
 
 export const inkRenderers: InputRenderers = {
@@ -153,4 +166,4 @@ export const inkRenderers: InputRenderers = {
   number: NumberInputPrompt,
   /** fallback/default */
   default: TextInputPrompt,
-};
+}

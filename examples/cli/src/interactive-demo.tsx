@@ -1,27 +1,28 @@
 #!/usr/bin/env node
-import React, { useState } from 'react';
-import { render, Text, Box, useInput, useApp } from 'ink';
-import { InputProvider, inkRenderers, input, initInput } from 'react-imperative-prompt/ink';
+import { Box, render, Text, useApp, useInput } from 'ink'
+import type React from 'react'
+import { useState } from 'react'
+import { InputProvider, initInput, inkRenderers, input } from 'react-imperative-prompt/ink'
 
 // Initialize input system
 initInput({
   renderers: inkRenderers,
   defaultRenderer: 'text',
-});
+})
 
-type DemoOption = 'text' | 'number' | 'select' | 'confirm' | 'sequential' | 'exit';
+type DemoOption = 'text' | 'number' | 'select' | 'confirm' | 'sequential' | 'exit'
 
 interface DemoResult {
-  type: string;
-  value: any;
-  timestamp: Date;
+  type: string
+  value: string | number | boolean | null
+  timestamp: Date
 }
 
 const InteractiveDemo: React.FC = () => {
-  const [selectedOption, setSelectedOption] = useState(0);
-  const [results, setResults] = useState<DemoResult[]>([]);
-  const [isRunning, setIsRunning] = useState(false);
-  const { exit } = useApp();
+  const [selectedOption, setSelectedOption] = useState(0)
+  const [results, setResults] = useState<DemoResult[]>([])
+  const [isRunning, setIsRunning] = useState(false)
+  const { exit } = useApp()
 
   const options: Array<{ key: DemoOption; label: string; description: string }> = [
     { key: 'text', label: 'Text Input', description: 'Get text input from user' },
@@ -30,27 +31,27 @@ const InteractiveDemo: React.FC = () => {
     { key: 'confirm', label: 'Confirmation', description: 'Yes/No confirmation prompt' },
     { key: 'sequential', label: 'Sequential Flow', description: 'Multi-step input process' },
     { key: 'exit', label: 'Exit', description: 'Exit the demo' },
-  ];
+  ]
 
-  useInput(async (input, key) => {
-    if (isRunning) return;
+  useInput(async (_input, key) => {
+    if (isRunning) return
 
     if (key.upArrow) {
-      setSelectedOption((prev) => (prev - 1 + options.length) % options.length);
+      setSelectedOption((prev) => (prev - 1 + options.length) % options.length)
     } else if (key.downArrow) {
-      setSelectedOption((prev) => (prev + 1) % options.length);
+      setSelectedOption((prev) => (prev + 1) % options.length)
     } else if (key.return) {
-      await runDemo(options[selectedOption].key);
+      await runDemo(options[selectedOption].key)
     }
-  });
+  })
 
   const runDemo = async (demo: DemoOption) => {
     if (demo === 'exit') {
-      exit();
-      return;
+      exit()
+      return
     }
 
-    setIsRunning(true);
+    setIsRunning(true)
 
     try {
       switch (demo) {
@@ -59,9 +60,9 @@ const InteractiveDemo: React.FC = () => {
             message: 'Enter some text:',
             placeholder: 'Type here...',
             defaultValue: 'Hello, world!',
-          });
-          setResults((prev) => [...prev, { type: 'Text', value: result, timestamp: new Date() }]);
-          break;
+          })
+          setResults((prev) => [...prev, { type: 'Text', value: result, timestamp: new Date() }])
+          break
         }
 
         case 'number': {
@@ -70,9 +71,9 @@ const InteractiveDemo: React.FC = () => {
             min: 1,
             max: 100,
             defaultValue: 50,
-          });
-          setResults((prev) => [...prev, { type: 'Number', value: result, timestamp: new Date() }]);
-          break;
+          })
+          setResults((prev) => [...prev, { type: 'Number', value: result, timestamp: new Date() }])
+          break
         }
 
         case 'select': {
@@ -85,24 +86,27 @@ const InteractiveDemo: React.FC = () => {
               { label: 'Rust', value: 'rs' },
               { label: 'Go', value: 'go' },
             ],
-          });
-          setResults((prev) => [...prev, { type: 'Select', value: result, timestamp: new Date() }]);
-          break;
+          })
+          setResults((prev) => [...prev, { type: 'Select', value: result, timestamp: new Date() }])
+          break
         }
 
         case 'confirm': {
           const result = await input.confirm({
             message: 'Do you like this demo?',
             defaultValue: true,
-          });
-          setResults((prev) => [...prev, { type: 'Confirm', value: result ? 'Yes' : 'No', timestamp: new Date() }]);
-          break;
+          })
+          setResults((prev) => [
+            ...prev,
+            { type: 'Confirm', value: result ? 'Yes' : 'No', timestamp: new Date() },
+          ])
+          break
         }
 
         case 'sequential': {
           const name = await input.text({
             message: 'What is your name?',
-          });
+          })
 
           const language = await input.select({
             message: `Nice to meet you, ${name}! What\'s your favorite language?`,
@@ -111,25 +115,28 @@ const InteractiveDemo: React.FC = () => {
               { label: 'JavaScript', value: 'JavaScript' },
               { label: 'Python', value: 'Python' },
             ],
-          });
+          })
 
           const years = await input.number({
             message: `How many years have you been using ${language}?`,
             min: 0,
             max: 50,
-          });
+          })
 
-          const summary = `${name} has been using ${language} for ${years} year(s)`;
-          setResults((prev) => [...prev, { type: 'Sequential', value: summary, timestamp: new Date() }]);
-          break;
+          const summary = `${name} has been using ${language} for ${years} year(s)`
+          setResults((prev) => [
+            ...prev,
+            { type: 'Sequential', value: summary, timestamp: new Date() },
+          ])
+          break
         }
       }
-    } catch (error) {
+    } catch (_error) {
       // User cancelled
     } finally {
-      setIsRunning(false);
+      setIsRunning(false)
     }
-  };
+  }
 
   return (
     <Box flexDirection="column" padding={1}>
@@ -159,14 +166,23 @@ const InteractiveDemo: React.FC = () => {
       )}
 
       {results.length > 0 && (
-        <Box flexDirection="column" borderStyle="single" borderColor="gray" padding={1} marginTop={1}>
+        <Box
+          flexDirection="column"
+          borderStyle="single"
+          borderColor="gray"
+          padding={1}
+          marginTop={1}
+        >
           <Box marginBottom={1}>
             <Text bold color="yellow">
               📝 Results:
             </Text>
           </Box>
           {results.slice(-5).map((result, index) => (
-            <Box key={index} marginBottom={index < results.length - 1 ? 1 : 0}>
+            <Box
+              key={`result-${result.timestamp.getTime()}-${index}`}
+              marginBottom={index < results.length - 1 ? 1 : 0}
+            >
               <Text>
                 <Text color="blue">[{result.type}]</Text> {String(result.value)}
               </Text>
@@ -180,15 +196,15 @@ const InteractiveDemo: React.FC = () => {
         </Box>
       )}
     </Box>
-  );
-};
+  )
+}
 
 const Main: React.FC = () => {
   return (
     <InputProvider>
       <InteractiveDemo />
     </InputProvider>
-  );
-};
+  )
+}
 
-render(<Main />);
+render(<Main />)

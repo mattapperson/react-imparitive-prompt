@@ -1,0 +1,109 @@
+name: Code Quality
+
+on:
+  pull_request:
+    paths:
+      - '**.ts'
+      - '**.tsx'
+      - '**.js'
+      - '**.jsx'
+      - 'package.json'
+      - 'tsconfig.json'
+      - 'biome.json'
+
+jobs:
+  code-analysis:
+    name: Code Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for better analysis
+          
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+          
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+            
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+        
+      - name: Check for unused dependencies
+        run: |
+          echo "## 📦 Dependency Analysis" >> $GITHUB_STEP_SUMMARY
+          npx depcheck --json > depcheck.json || true
+          if [ -s depcheck.json ]; then
+            echo "### Unused Dependencies" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`json" >> $GITHUB_STEP_SUMMARY
+            cat depcheck.json >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ No unused dependencies found" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+      - name: Check for duplicate code
+        run: |
+          echo "## 🔍 Code Duplication Check" >> $GITHUB_STEP_SUMMARY
+          npx jscpd src --min-lines 5 --min-tokens 50 --format "json" > duplication.json || true
+          if [ -s duplication.json ]; then
+            echo "### Duplication Report" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`json" >> $GITHUB_STEP_SUMMARY
+            cat duplication.json | head -50 >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ No significant code duplication found" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+      - name: Analyze bundle size
+        run: |
+          bun run build
+          echo "## 📊 Bundle Size Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          ls -lah dist/ | grep -E '\.(js|mjs|d\.ts)$' >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### File Sizes" >> $GITHUB_STEP_SUMMARY
+          for file in dist/*.{js,mjs}; do
+            if [ -f "$file" ]; then
+              size=$(wc -c < "$file" | numfmt --to=iec-i --suffix=B)
+              gzip_size=$(gzip -c "$file" | wc -c | numfmt --to=iec-i --suffix=B)
+              echo "- \`$(basename $file)\`: $size (gzipped: $gzip_size)" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+          
+      - name: TypeScript strict mode verification
+        run: |
+          echo "## 🔒 TypeScript Strict Mode Check" >> $GITHUB_STEP_SUMMARY
+          if grep -q '"strict": true' tsconfig.json; then
+            echo "✅ TypeScript strict mode is enabled" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ TypeScript strict mode is not enabled" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+      - name: Security audit
+        run: |
+          echo "## 🔐 Security Audit" >> $GITHUB_STEP_SUMMARY
+          bun audit 2>&1 | tee audit.txt || true
+          if grep -q "found 0 vulnerabilities" audit.txt; then
+            echo "✅ No security vulnerabilities found" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Security vulnerabilities detected:" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            cat audit.txt >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+      - name: License check
+        run: |
+          echo "## 📜 License Compatibility" >> $GITHUB_STEP_SUMMARY
+          npx license-checker --production --summary >> $GITHUB_STEP_SUMMARY 2>&1 || true

@@ -1,23 +1,32 @@
 // Setup for Ink tests - mocks stdin methods required by ink-text-input
 
+// Use type assertion instead of interface extending to avoid conflicts
+const stdin = process.stdin as NodeJS.ReadStream & {
+  ref?: () => NodeJS.ReadStream
+  unref?: () => NodeJS.ReadStream
+  setRawMode?: (mode: boolean) => NodeJS.ReadStream
+  isTTY?: boolean
+  setEncoding?: (encoding: BufferEncoding) => NodeJS.ReadStream
+}
+
 // Create proper stdin mocks
-if (!process.stdin.ref) {
-  (process.stdin as any).ref = () => process.stdin;
+if (!stdin.ref) {
+  stdin.ref = () => process.stdin
 }
 
-if (!process.stdin.unref) {
-  (process.stdin as any).unref = () => process.stdin;
+if (!stdin.unref) {
+  stdin.unref = () => process.stdin
 }
 
-if (!process.stdin.setRawMode) {
-  (process.stdin as any).setRawMode = () => process.stdin;
+if (!stdin.setRawMode) {
+  stdin.setRawMode = () => process.stdin
 }
 
-if (!process.stdin.isTTY) {
-  (process.stdin as any).isTTY = true;
+if (!stdin.isTTY) {
+  stdin.isTTY = true
 }
 
 // Mock setEncoding if not available
-if (!process.stdin.setEncoding) {
-  (process.stdin as any).setEncoding = () => process.stdin;
+if (!stdin.setEncoding) {
+  stdin.setEncoding = () => process.stdin
 }
