@@ -28,10 +28,11 @@ export function TextInputModal({ prompt, queueLength, onSubmit, onCancel }: Rend
         )}
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: 16 }}>
-            <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>
+            <label htmlFor="text-input" style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>
               {prompt.message}
             </label>
             <input
+              id="text-input"
               type={inputType}
               value={value}
               onChange={(e) => setValue(e.target.value)}
@@ -62,7 +63,6 @@ export function NumberInputModal({ prompt, queueLength, onSubmit, onCancel }: Re
     // Empty string is null unless required
     if (raw === '') {
       if (prompt.required) return;
-      onSubmit(NaN as unknown as number); // we won't actually use this path; better: treat empty as invalid when required
       onCancel(); // resolve null via provider
       return;
     }
@@ -85,10 +85,11 @@ export function NumberInputModal({ prompt, queueLength, onSubmit, onCancel }: Re
         )}
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: 16 }}>
-            <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>
+            <label htmlFor="number-input" style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>
               {prompt.message}
             </label>
             <input
+              id="number-input"
               type="number"
               value={raw}
               onChange={(e) => setRaw(e.target.value)}
