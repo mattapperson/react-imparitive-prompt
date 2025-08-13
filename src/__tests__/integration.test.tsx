@@ -66,7 +66,7 @@ describe('Integration Tests', () => {
       );
 
       // Trigger input
-      fireEvent.click(screen.getByTestId('trigger'));
+      fireEvent.click(screen.getByTestId('trigger-text'));
 
       // Wait for modal to appear
       await waitFor(() => {
@@ -115,7 +115,7 @@ describe('Integration Tests', () => {
 
         return (
           <div>
-            <button onClick={handleMultiInput} data-testid="trigger-unique">
+            <button onClick={handleMultiInput} data-testid="trigger-multi">
               Start Multi Input
             </button>
             {data && (
@@ -133,7 +133,7 @@ describe('Integration Tests', () => {
         </InputProvider>
       );
 
-      fireEvent.click(screen.getByTestId('trigger'));
+      fireEvent.click(screen.getByTestId('trigger-multi'));
 
       // First input - name
       await waitFor(() => {
@@ -179,7 +179,7 @@ describe('Integration Tests', () => {
 
         return (
           <div>
-            <button onClick={handleInput} data-testid="trigger-unique">
+            <button onClick={handleInput} data-testid="trigger-cancel">
               Start Input
             </button>
             {result && <div data-testid="result">{result}</div>}
@@ -193,7 +193,7 @@ describe('Integration Tests', () => {
         </InputProvider>
       );
 
-      fireEvent.click(screen.getByTestId('trigger'));
+      fireEvent.click(screen.getByTestId('trigger-cancel'));
 
       await waitFor(() => {
         expect(screen.getByText('Enter text')).toBeTruthy();
@@ -222,7 +222,7 @@ describe('Integration Tests', () => {
 
         return (
           <div>
-            <button onClick={handleBatch} data-testid="trigger-unique">
+            <button onClick={handleBatch} data-testid="trigger-batch">
               Start Batch
             </button>
             {results.length > 0 && (
@@ -238,7 +238,7 @@ describe('Integration Tests', () => {
         </InputProvider>
       );
 
-      fireEvent.click(screen.getByTestId('trigger'));
+      fireEvent.click(screen.getByTestId('trigger-batch'));
 
       // First prompt with queue indicator
       await waitFor(() => {
@@ -339,7 +339,7 @@ describe('Integration Tests', () => {
 
         return (
           <div>
-            <button onClick={handleInput} data-testid="trigger-unique">
+            <button onClick={handleInput} data-testid="trigger-abort">
               Start Input
             </button>
             <button onClick={handleAbort} data-testid="abort">
@@ -356,7 +356,7 @@ describe('Integration Tests', () => {
         </InputProvider>
       );
 
-      fireEvent.click(screen.getByTestId('trigger'));
+      fireEvent.click(screen.getByTestId('trigger-abort'));
 
       await waitFor(() => {
         expect(screen.getByText('Abortable input')).toBeTruthy();
@@ -385,7 +385,7 @@ describe('Integration Tests', () => {
 
         return (
           <div>
-            <button onClick={handleInput} data-testid="trigger-unique">
+            <button onClick={handleInput} data-testid="trigger-password">
               Set Password
             </button>
             {result && <div data-testid="result">{result}</div>}
@@ -399,7 +399,7 @@ describe('Integration Tests', () => {
         </InputProvider>
       );
 
-      fireEvent.click(screen.getByTestId('trigger'));
+      fireEvent.click(screen.getByTestId('trigger-password'));
 
       await waitFor(() => {
         expect(screen.getByText('Enter password')).toBeTruthy();
@@ -433,7 +433,7 @@ describe('Integration Tests', () => {
 
         return (
           <div>
-            <button onClick={handleInput} data-testid="trigger-unique">
+            <button onClick={handleInput} data-testid="trigger-age">
               Enter Age
             </button>
             {result && <div data-testid="result">{result}</div>}
@@ -447,7 +447,7 @@ describe('Integration Tests', () => {
         </InputProvider>
       );
 
-      fireEvent.click(screen.getByTestId('trigger'));
+      fireEvent.click(screen.getByTestId('trigger-age'));
 
       await waitFor(() => {
         expect(screen.getByText('Enter your age')).toBeTruthy();
@@ -483,7 +483,7 @@ describe('Integration Tests', () => {
 
         return (
           <div>
-            <button onClick={handleInput} data-testid="trigger-unique">
+            <button onClick={handleInput} data-testid="trigger-missing">
               Trigger
             </button>
             {result && <div data-testid="result">{result}</div>}
@@ -497,7 +497,7 @@ describe('Integration Tests', () => {
         </InputProvider>
       );
 
-      fireEvent.click(screen.getByTestId('trigger'));
+      fireEvent.click(screen.getByTestId('trigger-missing'));
 
       await waitFor(() => {
         expect(screen.getByTestId('result').textContent).toBe('Handled missing renderer');
