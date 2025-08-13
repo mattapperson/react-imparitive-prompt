@@ -34,6 +34,11 @@
       "types": "./dist/ink.d.ts",
       "import": "./dist/ink.mjs",
       "require": "./dist/ink.js"
+    },
+    "./web": {
+      "types": "./dist/web.d.ts",
+      "import": "./dist/web.mjs",
+      "require": "./dist/web.js"
     }
   },
   "description": "Platform-agnostic imperative prompt system for React",

@@ -1,11 +1,9 @@
 // inkRenderer.test.tsx
 import './ink-setup'; // Import setup first to mock stdin
 import { describe, it, expect, beforeEach, mock } from 'bun:test';
-import React from 'react';
 import { render } from 'ink-testing-library';
-import delay from 'delay';
 import { TextInputPrompt, NumberInputPrompt, inkRenderers } from '../inkRenderer';
-import type { BaseInputOptions } from '../types';
+import type { InputPrompt } from '../types';
 
 describe('inkRenderer', () => {
   const mockOnSubmit = mock();
@@ -17,12 +15,14 @@ describe('inkRenderer', () => {
   });
 
   describe('TextInputPrompt', () => {
-    const defaultPrompt: BaseInputOptions<string> = {
+    const defaultPrompt: InputPrompt<string> = {
       message: 'Enter your name',
       placeholder: 'John Doe',
       defaultValue: '',
       kind: 'text',
       required: false,
+      id: 'test-1',
+      resolve: () => {},
     };
 
     it('should render the prompt message', () => {
@@ -110,12 +110,14 @@ describe('inkRenderer', () => {
   });
 
   describe('NumberInputPrompt', () => {
-    const defaultPrompt: BaseInputOptions<number> = {
+    const defaultPrompt: InputPrompt<number> = {
       message: 'Enter your age',
       placeholder: '25',
       defaultValue: undefined,
       kind: 'number',
       required: false,
+      id: 'test-num-1',
+      resolve: () => {},
     };
 
     it('should render the prompt message', () => {

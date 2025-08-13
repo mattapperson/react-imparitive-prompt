@@ -4,8 +4,6 @@ import type {
   InputOptions,
   InputPrompt,
   RendererProps,
-  InputRenderer,
-  InputRenderers,
   MissingRendererPolicy,
   InputConfig,
   InputEvents,
@@ -34,13 +32,13 @@ describe('types', () => {
     const testPrompt: InputPrompt<string> = {
       id: 'test-id',
       message: 'test',
-      resolve: (value: string | null) => {},
+      resolve: (_value: string | null) => {},
     };
 
     const testRendererProps: RendererProps<string> = {
       prompt: testPrompt,
       queueLength: 0,
-      onSubmit: (value: string) => {},
+      onSubmit: (_value: string) => {},
       onCancel: () => {},
     };
 
