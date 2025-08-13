@@ -461,6 +461,28 @@ describe('NumberInputModal', () => {
     expect(mockOnSubmit).not.toHaveBeenCalled();
   });
 
+  it('should not submit invalid number for required field', () => {
+    const prompt = { ...defaultPrompt, required: true };
+    render(
+      <NumberInputModal
+        prompt={prompt}
+        queueLength={0}
+        onSubmit={mockOnSubmit}
+        onCancel={mockOnCancel}
+      />
+    );
+
+    const input = document.getElementById('number-input');
+    fireEvent.change(input, { target: { value: 'invalid' } });
+    
+    const form = input.closest('form')!;
+    fireEvent.submit(form);
+
+    // Should not call either handler for invalid required input
+    expect(mockOnSubmit).not.toHaveBeenCalled();
+    expect(mockOnCancel).not.toHaveBeenCalled();
+  });
+
   it('should have number input type', () => {
     render(
       <NumberInputModal

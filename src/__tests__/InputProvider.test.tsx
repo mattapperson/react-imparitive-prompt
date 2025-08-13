@@ -13,6 +13,25 @@ import type { InputConfig, RendererProps } from '../types';
 describe('InputProvider', () => {
   beforeEach(() => {
     cleanup();
+    // Clear any existing state from inputManager
+    while (inputManager.getCurrentPrompt()) {
+      const current = inputManager.getCurrentPrompt();
+      if (current) {
+        inputManager.resolvePrompt(current.id, null);
+      }
+    }
+    // Clear the queue
+    while (inputManager.getQueueLength() > 0) {
+      const current = inputManager.getCurrentPrompt();
+      if (!current && inputManager.getQueueLength() > 0) {
+        // Force process the queue
+        (inputManager as any).processQueue();
+      }
+      if (current) {
+        inputManager.resolvePrompt(current.id, null);
+      }
+    }
+    
     // Initialize with a test renderer
     const config: InputConfig = {
       renderers: {
@@ -27,9 +46,11 @@ describe('InputProvider', () => {
   afterEach(() => {
     cleanup();
     // Clean up any pending prompts
-    const current = inputManager.getCurrentPrompt();
-    if (current) {
-      inputManager.resolvePrompt(current.id, null);
+    while (inputManager.getCurrentPrompt()) {
+      const current = inputManager.getCurrentPrompt();
+      if (current) {
+        inputManager.resolvePrompt(current.id, null);
+      }
     }
   });
 
@@ -192,20 +213,24 @@ describe('InputProvider', () => {
   });
 
   it('should cleanup subscription on unmount', async () => {
+    // Get listener count before mounting
+    const beforeMountCount = (inputManager as any).listeners.size;
+    
     const { unmount } = render(
       <InputProvider>
         <div>Content</div>
       </InputProvider>
     );
 
-    // Get initial subscriber count
-    const initialListenerCount = (inputManager as any).listeners.size;
+    // Should have added one listener
+    const afterMountCount = (inputManager as any).listeners.size;
+    expect(afterMountCount).toBe(beforeMountCount + 1);
 
     unmount();
 
-    // Verify subscription was cleaned up
-    const finalListenerCount = (inputManager as any).listeners.size;
-    expect(finalListenerCount).toBe(initialListenerCount);
+    // Should have removed the listener
+    const afterUnmountCount = (inputManager as any).listeners.size;
+    expect(afterUnmountCount).toBe(beforeMountCount);
   });
 
   it('should not re-subscribe on re-render', async () => {

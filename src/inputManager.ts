@@ -68,6 +68,8 @@ export class InputManager {
 
       this.queue.push(prompt);
       this.processQueue();
+      // Notify after adding to queue so UI can see updated queue length
+      this.notify();
     });
   }
 
