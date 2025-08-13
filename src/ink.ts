@@ -3,7 +3,8 @@
 // Example: import { inkRenderers } from 'react-imperative-prompt/ink';
 
 export { inkRenderers, TextInputPrompt, NumberInputPrompt } from './inkRenderer';
-export { input, initInput, inputManager } from './inputManager';
+export { initInput, inputManager } from './inputManager';
+export { input } from './helpers'; // Export enhanced input with convenience methods
 export { InputProvider } from './InputProvider';
 
 // Re-export types

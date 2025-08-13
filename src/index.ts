@@ -1,7 +1,7 @@
 // Main library exports
-export { input, initInput, inputManager } from './inputManager';
-export { InputProvider } from './InputProvider';
-export { webRenderers, TextInputModal, NumberInputModal } from './webRenderers';
+export { initInput, inputManager } from "./inputManager";
+export { input } from "./helpers"; // Export enhanced input with convenience methods
+export { InputProvider } from "./InputProvider";
 
 // Re-export types
 export type {
@@ -14,4 +14,4 @@ export type {
   InputRenderers,
   MissingRendererPolicy,
   BaseInputOptions,
-} from './types';
+} from "./types";

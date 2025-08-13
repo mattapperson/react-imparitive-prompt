@@ -5,7 +5,8 @@ const jest = {
   spyOn,
 };
 import React from 'react';
-import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
+import { render, cleanup } from '@testing-library/react';
+import { screen, fireEvent, waitFor } from './test-utils';
 import { InputProvider } from '../InputProvider';
 import { inputManager } from '../inputManager';
 import type { InputConfig, RendererProps } from '../types';
@@ -70,7 +71,7 @@ describe('InputProvider', () => {
   }
 
   it('should render children when no prompt', () => {
-    const { container } = render(
+    render(
       <InputProvider>
         <div data-testid="child">Child Content</div>
       </InputProvider>
@@ -161,7 +162,7 @@ describe('InputProvider', () => {
   });
 
   it('should handle missing renderer', async () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     
     render(
       <InputProvider>

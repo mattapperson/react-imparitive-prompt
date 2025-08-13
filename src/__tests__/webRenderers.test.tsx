@@ -1,20 +1,20 @@
-import { describe, it, expect, beforeEach, mock } from 'bun:test';
+import { describe, it, expect, beforeEach, mock } from "bun:test";
 
 const jest = {
   fn: mock,
 };
-import React from 'react';
-import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
-import { TextInputModal, NumberInputModal, webRenderers } from '../webRenderers';
-import type { InputPrompt } from '../types';
+import { render, cleanup } from "@testing-library/react";
+import { screen, fireEvent } from "./test-utils";
+import { TextInputModal, NumberInputModal, webRenderers } from "../web";
+import type { InputPrompt } from "../types";
 
-describe('TextInputModal', () => {
+describe("TextInputModal", () => {
   const mockOnSubmit = jest.fn();
   const mockOnCancel = jest.fn();
 
   const defaultPrompt: InputPrompt<string> = {
-    id: 'test-id',
-    message: 'Enter text',
+    id: "test-id",
+    message: "Enter text",
     resolve: jest.fn(),
   };
 
@@ -24,7 +24,7 @@ describe('TextInputModal', () => {
     mockOnCancel.mockClear();
   });
 
-  it('should render with message', () => {
+  it("should render with message", () => {
     render(
       <TextInputModal
         prompt={defaultPrompt}
@@ -34,10 +34,10 @@ describe('TextInputModal', () => {
       />
     );
 
-    expect(screen.getByText('Enter text')).toBeTruthy();
+    expect(screen.getByText("Enter text")).toBeTruthy();
   });
 
-  it('should show queue length when > 0', () => {
+  it("should show queue length when > 0", () => {
     render(
       <TextInputModal
         prompt={defaultPrompt}
@@ -47,10 +47,10 @@ describe('TextInputModal', () => {
       />
     );
 
-    expect(screen.getByText('3 more steps remaining')).toBeTruthy();
+    expect(screen.getByText("3 more steps remaining")).toBeTruthy();
   });
 
-  it('should show singular for queue length of 1', () => {
+  it("should show singular for queue length of 1", () => {
     render(
       <TextInputModal
         prompt={defaultPrompt}
@@ -60,10 +60,10 @@ describe('TextInputModal', () => {
       />
     );
 
-    expect(screen.getByText('1 more step remaining')).toBeTruthy();
+    expect(screen.getByText("1 more step remaining")).toBeTruthy();
   });
 
-  it('should not show queue indicator when 0', () => {
+  it("should not show queue indicator when 0", () => {
     render(
       <TextInputModal
         prompt={defaultPrompt}
@@ -76,8 +76,8 @@ describe('TextInputModal', () => {
     expect(screen.queryByText(/more step/)).toBeNull();
   });
 
-  it('should use default value', () => {
-    const prompt = { ...defaultPrompt, defaultValue: 'default text' };
+  it("should use default value", () => {
+    const prompt = { ...defaultPrompt, defaultValue: "default text" };
     render(
       <TextInputModal
         prompt={prompt}
@@ -87,12 +87,12 @@ describe('TextInputModal', () => {
       />
     );
 
-    const input = screen.getByRole('textbox') as HTMLInputElement;
-    expect(input.value).toBe('default text');
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+    expect(input.value).toBe("default text");
   });
 
-  it('should use placeholder', () => {
-    const prompt = { ...defaultPrompt, placeholder: 'Enter something...' };
+  it("should use placeholder", () => {
+    const prompt = { ...defaultPrompt, placeholder: "Enter something..." };
     render(
       <TextInputModal
         prompt={prompt}
@@ -102,11 +102,11 @@ describe('TextInputModal', () => {
       />
     );
 
-    const input = screen.getByRole('textbox') as HTMLInputElement;
-    expect(input.placeholder).toBe('Enter something...');
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+    expect(input.placeholder).toBe("Enter something...");
   });
 
-  it('should handle text input change', () => {
+  it("should handle text input change", () => {
     render(
       <TextInputModal
         prompt={defaultPrompt}
@@ -116,12 +116,12 @@ describe('TextInputModal', () => {
       />
     );
 
-    const input = screen.getByRole('textbox') as HTMLInputElement;
-    fireEvent.change(input, { target: { value: 'new text' } });
-    expect(input.value).toBe('new text');
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "new text" } });
+    expect(input.value).toBe("new text");
   });
 
-  it('should submit on form submit', () => {
+  it("should submit on form submit", () => {
     render(
       <TextInputModal
         prompt={defaultPrompt}
@@ -131,16 +131,16 @@ describe('TextInputModal', () => {
       />
     );
 
-    const input = screen.getByRole('textbox');
-    fireEvent.change(input, { target: { value: 'submitted text' } });
-    
-    const form = input.closest('form')!;
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "submitted text" } });
+
+    const form = input.closest("form")!;
     fireEvent.submit(form);
 
-    expect(mockOnSubmit).toHaveBeenCalledWith('submitted text');
+    expect(mockOnSubmit).toHaveBeenCalledWith("submitted text");
   });
 
-  it('should not submit empty required field', () => {
+  it("should not submit empty required field", () => {
     const prompt = { ...defaultPrompt, required: true };
     render(
       <TextInputModal
@@ -151,16 +151,16 @@ describe('TextInputModal', () => {
       />
     );
 
-    const input = screen.getByRole('textbox');
-    fireEvent.change(input, { target: { value: '   ' } }); // whitespace only
-    
-    const form = input.closest('form')!;
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "   " } }); // whitespace only
+
+    const form = input.closest("form")!;
     fireEvent.submit(form);
 
     expect(mockOnSubmit).not.toHaveBeenCalled();
   });
 
-  it('should allow empty non-required field', () => {
+  it("should allow empty non-required field", () => {
     const prompt = { ...defaultPrompt, required: false };
     render(
       <TextInputModal
@@ -171,13 +171,13 @@ describe('TextInputModal', () => {
       />
     );
 
-    const form = screen.getByRole('textbox').closest('form')!;
+    const form = screen.getByRole("textbox").closest("form")!;
     fireEvent.submit(form);
 
-    expect(mockOnSubmit).toHaveBeenCalledWith('');
+    expect(mockOnSubmit).toHaveBeenCalledWith("");
   });
 
-  it('should handle cancel button', () => {
+  it("should handle cancel button", () => {
     render(
       <TextInputModal
         prompt={defaultPrompt}
@@ -187,11 +187,11 @@ describe('TextInputModal', () => {
       />
     );
 
-    fireEvent.click(screen.getByText('Cancel'));
+    fireEvent.click(screen.getByText("Cancel"));
     expect(mockOnCancel).toHaveBeenCalled();
   });
 
-  it('should show Next button when queue > 0', () => {
+  it("should show Next button when queue > 0", () => {
     render(
       <TextInputModal
         prompt={defaultPrompt}
@@ -201,11 +201,11 @@ describe('TextInputModal', () => {
       />
     );
 
-    expect(screen.getByText('Next')).toBeTruthy();
-    expect(screen.queryByText('Submit')).toBeNull();
+    expect(screen.getByText("Next")).toBeTruthy();
+    expect(screen.queryByText("Submit")).toBeNull();
   });
 
-  it('should show Submit button when queue is 0', () => {
+  it("should show Submit button when queue is 0", () => {
     render(
       <TextInputModal
         prompt={defaultPrompt}
@@ -215,12 +215,12 @@ describe('TextInputModal', () => {
       />
     );
 
-    expect(screen.getByText('Submit')).toBeTruthy();
-    expect(screen.queryByText('Next')).toBeNull();
+    expect(screen.getByText("Submit")).toBeTruthy();
+    expect(screen.queryByText("Next")).toBeNull();
   });
 
-  it('should render password input for password kind', () => {
-    const prompt = { ...defaultPrompt, kind: 'password' };
+  it("should render password input for password kind", () => {
+    const prompt = { ...defaultPrompt, kind: "password" };
     render(
       <TextInputModal
         prompt={prompt}
@@ -230,13 +230,13 @@ describe('TextInputModal', () => {
       />
     );
 
-    const input = document.getElementById('text-input') as HTMLInputElement;
+    const input = document.getElementById("text-input") as HTMLInputElement;
     expect(input).toBeTruthy();
-    expect(input.type).toBe('password');
+    expect(input.type).toBe("password");
   });
 
-  it('should render email input for email kind', () => {
-    const prompt = { ...defaultPrompt, kind: 'email' };
+  it("should render email input for email kind", () => {
+    const prompt = { ...defaultPrompt, kind: "email" };
     render(
       <TextInputModal
         prompt={prompt}
@@ -246,13 +246,13 @@ describe('TextInputModal', () => {
       />
     );
 
-    const input = document.getElementById('text-input') as HTMLInputElement;
+    const input = document.getElementById("text-input") as HTMLInputElement;
     expect(input).toBeTruthy();
-    expect(input.type).toBe('email');
+    expect(input.type).toBe("email");
   });
 
-  it('should render text input for unknown kind', () => {
-    const prompt = { ...defaultPrompt, kind: 'unknown' };
+  it("should render text input for unknown kind", () => {
+    const prompt = { ...defaultPrompt, kind: "unknown" };
     render(
       <TextInputModal
         prompt={prompt}
@@ -262,12 +262,12 @@ describe('TextInputModal', () => {
       />
     );
 
-    const input = document.getElementById('text-input') as HTMLInputElement;
+    const input = document.getElementById("text-input") as HTMLInputElement;
     expect(input).toBeTruthy();
-    expect(input.type).toBe('text');
+    expect(input.type).toBe("text");
   });
 
-  it('should have proper aria attributes', () => {
+  it("should have proper aria attributes", () => {
     render(
       <TextInputModal
         prompt={defaultPrompt}
@@ -277,18 +277,18 @@ describe('TextInputModal', () => {
       />
     );
 
-    const dialog = screen.getByRole('dialog');
-    expect(dialog.getAttribute('aria-modal')).toBe('true');
+    const dialog = screen.getByRole("dialog");
+    expect(dialog.getAttribute("aria-modal")).toBe("true");
   });
 });
 
-describe('NumberInputModal', () => {
+describe("NumberInputModal", () => {
   const mockOnSubmit = jest.fn();
   const mockOnCancel = jest.fn();
 
   const defaultPrompt: InputPrompt<number> = {
-    id: 'test-id',
-    message: 'Enter number',
+    id: "test-id",
+    message: "Enter number",
     resolve: jest.fn(),
   };
 
@@ -298,7 +298,7 @@ describe('NumberInputModal', () => {
     mockOnCancel.mockClear();
   });
 
-  it('should render with message', () => {
+  it("should render with message", () => {
     render(
       <NumberInputModal
         prompt={defaultPrompt}
@@ -308,10 +308,10 @@ describe('NumberInputModal', () => {
       />
     );
 
-    expect(screen.getByText('Enter number')).toBeTruthy();
+    expect(screen.getByText("Enter number")).toBeTruthy();
   });
 
-  it('should use default value', () => {
+  it("should use default value", () => {
     const prompt = { ...defaultPrompt, defaultValue: 42 };
     render(
       <NumberInputModal
@@ -322,11 +322,11 @@ describe('NumberInputModal', () => {
       />
     );
 
-    const input = document.getElementById('number-input') as HTMLInputElement;
-    expect(input.value).toBe('42');
+    const input = document.getElementById("number-input") as HTMLInputElement;
+    expect(input.value).toBe("42");
   });
 
-  it('should handle number input', () => {
+  it("should handle number input", () => {
     render(
       <NumberInputModal
         prompt={defaultPrompt}
@@ -336,16 +336,16 @@ describe('NumberInputModal', () => {
       />
     );
 
-    const input = document.getElementById('number-input');
-    fireEvent.change(input, { target: { value: '123' } });
-    
-    const form = input.closest('form')!;
+    const input = document.getElementById("number-input") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "123" } });
+
+    const form = input.closest("form")!;
     fireEvent.submit(form);
 
     expect(mockOnSubmit).toHaveBeenCalledWith(123);
   });
 
-  it('should handle decimal numbers', () => {
+  it("should handle decimal numbers", () => {
     render(
       <NumberInputModal
         prompt={defaultPrompt}
@@ -355,16 +355,16 @@ describe('NumberInputModal', () => {
       />
     );
 
-    const input = document.getElementById('number-input');
-    fireEvent.change(input, { target: { value: '3.14' } });
-    
-    const form = input.closest('form')!;
+    const input = document.getElementById("number-input") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "3.14" } });
+
+    const form = input.closest("form")!;
     fireEvent.submit(form);
 
     expect(mockOnSubmit).toHaveBeenCalledWith(3.14);
   });
 
-  it('should handle negative numbers', () => {
+  it("should handle negative numbers", () => {
     render(
       <NumberInputModal
         prompt={defaultPrompt}
@@ -374,16 +374,16 @@ describe('NumberInputModal', () => {
       />
     );
 
-    const input = document.getElementById('number-input');
-    fireEvent.change(input, { target: { value: '-42' } });
-    
-    const form = input.closest('form')!;
+    const input = document.getElementById("number-input") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "-42" } });
+
+    const form = input.closest("form")!;
     fireEvent.submit(form);
 
     expect(mockOnSubmit).toHaveBeenCalledWith(-42);
   });
 
-  it('should cancel on empty non-required field', () => {
+  it("should cancel on empty non-required field", () => {
     const prompt = { ...defaultPrompt, required: false };
     render(
       <NumberInputModal
@@ -394,14 +394,14 @@ describe('NumberInputModal', () => {
       />
     );
 
-    const form = screen.getByLabelText('Enter number').closest('form')!;
+    const form = screen.getByLabelText("Enter number").closest("form")!;
     fireEvent.submit(form);
 
     expect(mockOnCancel).toHaveBeenCalled();
     expect(mockOnSubmit).not.toHaveBeenCalled();
   });
 
-  it('should not submit empty required field', () => {
+  it("should not submit empty required field", () => {
     const prompt = { ...defaultPrompt, required: true };
     render(
       <NumberInputModal
@@ -412,14 +412,14 @@ describe('NumberInputModal', () => {
       />
     );
 
-    const form = screen.getByLabelText('Enter number').closest('form')!;
+    const form = screen.getByLabelText("Enter number").closest("form")!;
     fireEvent.submit(form);
 
     expect(mockOnSubmit).not.toHaveBeenCalled();
     expect(mockOnCancel).not.toHaveBeenCalled();
   });
 
-  it('should handle invalid number for required field', () => {
+  it("should handle invalid number for required field", () => {
     const prompt = { ...defaultPrompt, required: true };
     render(
       <NumberInputModal
@@ -430,17 +430,17 @@ describe('NumberInputModal', () => {
       />
     );
 
-    const input = document.getElementById('number-input');
-    fireEvent.change(input, { target: { value: 'not a number' } });
-    
-    const form = input.closest('form')!;
+    const input = document.getElementById("number-input") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "not a number" } });
+
+    const form = input.closest("form")!;
     fireEvent.submit(form);
 
     expect(mockOnSubmit).not.toHaveBeenCalled();
     expect(mockOnCancel).not.toHaveBeenCalled();
   });
 
-  it('should cancel on invalid number for non-required field', () => {
+  it("should cancel on invalid number for non-required field", () => {
     const prompt = { ...defaultPrompt, required: false };
     render(
       <NumberInputModal
@@ -451,17 +451,17 @@ describe('NumberInputModal', () => {
       />
     );
 
-    const input = document.getElementById('number-input');
-    fireEvent.change(input, { target: { value: 'not a number' } });
-    
-    const form = input.closest('form')!;
+    const input = document.getElementById("number-input") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "not a number" } });
+
+    const form = input.closest("form")!;
     fireEvent.submit(form);
 
     expect(mockOnCancel).toHaveBeenCalled();
     expect(mockOnSubmit).not.toHaveBeenCalled();
   });
 
-  it('should not submit invalid number for required field', () => {
+  it("should not submit invalid number for required field", () => {
     const prompt = { ...defaultPrompt, required: true };
     render(
       <NumberInputModal
@@ -472,10 +472,10 @@ describe('NumberInputModal', () => {
       />
     );
 
-    const input = document.getElementById('number-input');
-    fireEvent.change(input, { target: { value: 'invalid' } });
-    
-    const form = input.closest('form')!;
+    const input = document.getElementById("number-input") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "invalid" } });
+
+    const form = input.closest("form")!;
     fireEvent.submit(form);
 
     // Should not call either handler for invalid required input
@@ -483,7 +483,7 @@ describe('NumberInputModal', () => {
     expect(mockOnCancel).not.toHaveBeenCalled();
   });
 
-  it('should have number input type', () => {
+  it("should have number input type", () => {
     render(
       <NumberInputModal
         prompt={defaultPrompt}
@@ -493,12 +493,12 @@ describe('NumberInputModal', () => {
       />
     );
 
-    const input = document.getElementById('number-input') as HTMLInputElement;
-    expect(input.type).toBe('number');
-    expect(input.inputMode).toBe('decimal');
+    const input = document.getElementById("number-input") as HTMLInputElement;
+    expect(input.type).toBe("number");
+    expect(input.inputMode).toBe("decimal");
   });
 
-  it('should show queue information', () => {
+  it("should show queue information", () => {
     render(
       <NumberInputModal
         prompt={defaultPrompt}
@@ -508,11 +508,11 @@ describe('NumberInputModal', () => {
       />
     );
 
-    expect(screen.getByText('2 more steps remaining')).toBeTruthy();
-    expect(screen.getByText('Next')).toBeTruthy();
+    expect(screen.getByText("2 more steps remaining")).toBeTruthy();
+    expect(screen.getByText("Next")).toBeTruthy();
   });
 
-  it('should handle cancel button', () => {
+  it("should handle cancel button", () => {
     render(
       <NumberInputModal
         prompt={defaultPrompt}
@@ -522,12 +522,12 @@ describe('NumberInputModal', () => {
       />
     );
 
-    fireEvent.click(screen.getByText('Cancel'));
+    fireEvent.click(screen.getByText("Cancel"));
     expect(mockOnCancel).toHaveBeenCalled();
   });
 
-  it('should use placeholder', () => {
-    const prompt = { ...defaultPrompt, placeholder: '0-100' };
+  it("should use placeholder", () => {
+    const prompt = { ...defaultPrompt, placeholder: "0-100" };
     render(
       <NumberInputModal
         prompt={prompt}
@@ -537,11 +537,11 @@ describe('NumberInputModal', () => {
       />
     );
 
-    const input = document.getElementById('number-input') as HTMLInputElement;
-    expect(input.placeholder).toBe('0-100');
+    const input = document.getElementById("number-input") as HTMLInputElement;
+    expect(input.placeholder).toBe("0-100");
   });
 
-  it('should handle zero as valid input', () => {
+  it("should handle zero as valid input", () => {
     render(
       <NumberInputModal
         prompt={defaultPrompt}
@@ -551,18 +551,18 @@ describe('NumberInputModal', () => {
       />
     );
 
-    const input = document.getElementById('number-input');
-    fireEvent.change(input, { target: { value: '0' } });
-    
-    const form = input.closest('form')!;
+    const input = document.getElementById("number-input") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "0" } });
+
+    const form = input.closest("form")!;
     fireEvent.submit(form);
 
     expect(mockOnSubmit).toHaveBeenCalledWith(0);
   });
 });
 
-describe('webRenderers', () => {
-  it('should export all renderer types', () => {
+describe("webRenderers", () => {
+  it("should export all renderer types", () => {
     expect(webRenderers.text).toBe(TextInputModal);
     expect(webRenderers.email).toBe(TextInputModal);
     expect(webRenderers.password).toBe(TextInputModal);
@@ -570,12 +570,12 @@ describe('webRenderers', () => {
     expect(webRenderers.default).toBe(TextInputModal);
   });
 
-  it('should have correct keys', () => {
+  it("should have correct keys", () => {
     const keys = Object.keys(webRenderers);
-    expect(keys).toContain('text');
-    expect(keys).toContain('email');
-    expect(keys).toContain('password');
-    expect(keys).toContain('number');
-    expect(keys).toContain('default');
+    expect(keys).toContain("text");
+    expect(keys).toContain("email");
+    expect(keys).toContain("password");
+    expect(keys).toContain("number");
+    expect(keys).toContain("default");
   });
 });

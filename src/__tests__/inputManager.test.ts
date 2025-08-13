@@ -6,11 +6,11 @@ const jest = {
   spyOn,
   useFakeTimers: () => {},
   useRealTimers: () => {},
-  advanceTimersByTime: (ms: number) => {},
+  advanceTimersByTime: (_ms: number) => {},
   clearAllTimers: () => {},
 };
 import { InputManager, input, initInput, inputManager } from '../inputManager';
-import type { InputConfig, InputPrompt } from '../types';
+import type { InputConfig } from '../types';
 
 describe('InputManager', () => {
   let manager: InputManager;
@@ -42,7 +42,7 @@ describe('InputManager', () => {
     });
 
     it('should warn if defaultRenderer not found in renderers', () => {
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
       const config: InputConfig = {
         renderers: {},
         defaultRenderer: 'missing',
@@ -75,8 +75,8 @@ describe('InputManager', () => {
     });
 
     it('should handle multiple inputs in queue', async () => {
-      const promise1 = manager.input({ message: 'first' });
-      const promise2 = manager.input({ message: 'second' });
+      manager.input({ message: 'first' });
+      manager.input({ message: 'second' });
       
       expect(manager.getQueueLength()).toBe(1);
       const current = manager.getCurrentPrompt();
@@ -164,7 +164,7 @@ describe('InputManager', () => {
 
     it('should process queue after resolution', async () => {
       const promise1 = manager.input({ message: 'first' });
-      const promise2 = manager.input({ message: 'second' });
+      manager.input({ message: 'second' });
       
       const first = manager.getCurrentPrompt();
       manager.resolvePrompt(first!.id, 'value1');
@@ -176,7 +176,7 @@ describe('InputManager', () => {
     });
 
     it('should ignore resolution with wrong id', () => {
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
       manager.input({ message: 'test' });
       
       manager.resolvePrompt('wrong-id', 'value');
@@ -240,7 +240,7 @@ describe('InputManager', () => {
   describe('handleMissingRenderer', () => {
 
     it('should handle throw policy', async () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       const config: InputConfig = {
         renderers: { default: () => null as any },
         defaultRenderer: 'default',
@@ -498,7 +498,7 @@ describe('InputManager', () => {
       // @ts-ignore
       globalThis.crypto = undefined;
       
-      const promise = manager.input({ message: 'test' });
+      manager.input({ message: 'test' });
       const current = manager.getCurrentPrompt();
       
       expect(current?.id).toBeTruthy();
