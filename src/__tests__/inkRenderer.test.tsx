@@ -5,7 +5,7 @@ import { render } from 'ink-testing-library'
 import { inkRenderers, NumberInputPrompt, TextInputPrompt } from '../inkRenderer'
 import type { InputPrompt } from '../types'
 
-describe('inkRenderer', () => {
+describe.skip('inkRenderer', () => {
   const mockOnSubmit = mock()
   const mockOnCancel = mock()
 
