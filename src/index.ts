@@ -3,6 +3,8 @@
 export { input } from './helpers' // Export enhanced input with convenience methods
 export { InputProvider } from './InputProvider'
 export { display, initInput, inputManager } from './inputManager'
+export type { PromptInputRendererProps } from './PromptInputRenderer'
+export { PromptInputRenderer } from './PromptInputRenderer'
 
 // Re-export types
 export type {

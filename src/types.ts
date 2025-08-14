@@ -13,6 +13,8 @@ export interface BaseInputOptions<V> {
   /** Optional cancellation/timeout controls (handled by InputManager) */
   abortSignal?: AbortSignal
   timeoutMs?: number
+  /** Priority for queue ordering. Higher numbers = higher priority. Default is 0 for display, 10 for awaiting inputs */
+  priority?: number
 }
 
 export type InputOptions<V = string> = BaseInputOptions<V>

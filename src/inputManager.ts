@@ -28,11 +28,13 @@ interface DisplayState<V> {
 
 export class InputManager {
   private queue: Array<InputPrompt<any>> = []
-  private currentPrompt: InputPrompt<any> | null = null
+  private currentPrompt: InputPrompt<any> | DisplayPrompt<any> | null = null
   private listeners: Set<() => void> = new Set()
   private eventListeners: Set<(evt: InputEvents) => void> = new Set()
   private config: InputConfig | null = null
   private activeDisplays: Map<string, DisplayState<any>> = new Map()
+  private suspendedDisplay: DisplayPrompt<any> | null = null
+  private prioritizeAwaitingInputs = false
 
   init(config: InputConfig) {
     if (!config.defaultRenderer) {
@@ -44,6 +46,11 @@ export class InputManager {
     this.config = config
   }
 
+  setPrioritizeAwaitingInputs(value: boolean) {
+    this.prioritizeAwaitingInputs = value
+    this.notify()
+  }
+
   input<V = string>(options: InputOptions<V>): Promise<V | null> {
     if (!this.config) {
       throw new Error('InputManager.init() must be called first')
@@ -51,7 +58,9 @@ export class InputManager {
 
     return new Promise<V | null>((resolve) => {
       const id = uuid()
-      const prompt: InputPrompt<V> = { ...options, id, resolve }
+      // Set default priority: 10 for awaiting inputs when prioritization is enabled, 0 otherwise
+      const priority = options.priority ?? (this.prioritizeAwaitingInputs ? 10 : 0)
+      const prompt: InputPrompt<V> = { ...options, id, resolve, priority }
 
       // Attach abort/timeout handling before enqueue so we can cancel while queued
       const cleanup: Array<() => void> = []
@@ -80,7 +89,19 @@ export class InputManager {
         }
       }
 
-      this.queue.push(prompt)
+      // Insert prompt in the queue based on priority (higher priority first)
+      const insertIndex = this.queue.findIndex((p) => (p.priority ?? 0) < priority)
+      if (insertIndex === -1) {
+        this.queue.push(prompt)
+      } else {
+        this.queue.splice(insertIndex, 0, prompt)
+      }
+
+      // Check if we should suspend current display for high priority input
+      if (this.prioritizeAwaitingInputs && priority > 0) {
+        this.checkAndSuspendDisplay()
+      }
+
       this.processQueue()
       // Notify after adding to queue so UI can see updated queue length
       this.notify()
@@ -100,7 +121,9 @@ export class InputManager {
       const p = this.currentPrompt
       this.currentPrompt = null
       try {
-        p.resolve(null)
+        if ('resolve' in p) {
+          p.resolve(null)
+        }
         this.emit({ type: 'prompt:canceled', id, reason })
       } finally {
         this.notify()
@@ -126,6 +149,38 @@ export class InputManager {
     // Already resolved or unknown; ignore.
   }
 
+  private checkAndSuspendDisplay() {
+    // If there's a current display prompt with lower priority, suspend it
+    if (
+      this.currentPrompt &&
+      'type' in this.currentPrompt &&
+      this.currentPrompt.type === 'display'
+    ) {
+      const currentPriority = this.currentPrompt.priority ?? 0
+      const highestQueuePriority = Math.max(...this.queue.map((p) => p.priority ?? 0))
+
+      if (highestQueuePriority > currentPriority) {
+        this.suspendedDisplay = this.currentPrompt as DisplayPrompt<any>
+        this.currentPrompt = null
+      }
+    }
+  }
+
+  private restoreSuspendedDisplay() {
+    if (this.suspendedDisplay && !this.currentPrompt) {
+      // Check if there are any high priority items in the queue
+      const hasHighPriority = this.queue.some(
+        (p) => (p.priority ?? 0) > (this.suspendedDisplay?.priority ?? 0),
+      )
+
+      if (!hasHighPriority) {
+        this.currentPrompt = this.suspendedDisplay as any
+        this.suspendedDisplay = null
+        this.notify()
+      }
+    }
+  }
+
   private processQueue() {
     if (!this.currentPrompt && this.queue.length > 0) {
       const nextPrompt = this.queue.shift()
@@ -138,10 +193,13 @@ export class InputManager {
         })
         this.notify()
       }
+    } else if (!this.currentPrompt && this.queue.length === 0) {
+      // No more items in queue, restore suspended display if any
+      this.restoreSuspendedDisplay()
     }
   }
 
-  getCurrentPrompt(): InputPrompt<any> | null {
+  getCurrentPrompt(): InputPrompt<any> | DisplayPrompt<any> | null {
     return this.currentPrompt
   }
 
@@ -151,11 +209,14 @@ export class InputManager {
     }
 
     const id = uuid()
+    // Display prompts have priority 0 by default (lower than awaiting inputs)
+    const priority = options.priority ?? 0
     const prompt: DisplayPrompt<V> = {
       ...options,
       id,
       type: 'display',
       currentValue: options.initialValue,
+      priority,
     }
 
     const state: DisplayState<V> = {
@@ -166,6 +227,32 @@ export class InputManager {
     }
 
     this.activeDisplays.set(id, state)
+
+    // Add display prompt to the queue system if prioritizeAwaitingInputs is enabled
+    if (this.prioritizeAwaitingInputs) {
+      // If no current prompt, set as current
+      if (!this.currentPrompt) {
+        this.currentPrompt = prompt
+      } else {
+        // Check if this display should wait for higher priority items
+        const currentPriority = this.currentPrompt.priority ?? 0
+        if (priority > currentPriority) {
+          // This display has higher priority, make it current
+          if ('resolve' in this.currentPrompt) {
+            // Current is an input prompt, push it back to queue
+            this.queue.unshift(this.currentPrompt as InputPrompt<any>)
+          } else {
+            // Current is a display, suspend it
+            this.suspendedDisplay = this.currentPrompt as DisplayPrompt<any>
+          }
+          this.currentPrompt = prompt
+        }
+      }
+    } else if (!this.currentPrompt) {
+      // In non-priority mode, just set as current if nothing else is active
+      this.currentPrompt = prompt
+    }
+
     this.emit({ type: 'display:started', id, kind: options.kind })
     this.notify()
 
@@ -264,6 +351,22 @@ export class InputManager {
     }
     state.subscribers.clear()
 
+    // If this display is current, clear it and process queue
+    if (
+      this.currentPrompt &&
+      'type' in this.currentPrompt &&
+      this.currentPrompt.type === 'display' &&
+      this.currentPrompt.id === id
+    ) {
+      this.currentPrompt = null
+      this.processQueue()
+    }
+
+    // If this display is suspended, clear it
+    if (this.suspendedDisplay && this.suspendedDisplay.id === id) {
+      this.suspendedDisplay = null
+    }
+
     this.activeDisplays.delete(id)
     this.emit({ type: 'display:canceled', id })
     this.notify()
@@ -275,6 +378,10 @@ export class InputManager {
 
   getQueueLength(): number {
     return this.queue.length
+  }
+
+  getQueue(): InputPrompt<any>[] {
+    return [...this.queue]
   }
 
   getRenderer(kind?: string): InputRenderer<any> | null {
@@ -290,7 +397,15 @@ export class InputManager {
       console.warn('resolvePrompt called with non-current id', { id })
       return
     }
-    const { resolve } = this.currentPrompt
+
+    // Check if it's a display prompt (they don't have resolve)
+    if ('type' in this.currentPrompt && this.currentPrompt.type === 'display') {
+      // For display prompts, we update the value instead
+      this.updateDisplay(id, value)
+      return
+    }
+
+    const { resolve } = this.currentPrompt as InputPrompt<any>
     this.currentPrompt = null
     try {
       resolve(value)

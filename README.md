@@ -31,7 +31,7 @@ bun add react-imperative-prompt
 ### Web Application (Next.js, Vite, etc.)
 
 ```tsx
-import { InputProvider, input, initInput, webRenderers } from 'react-imperative-prompt';
+import { InputProvider, PromptInputRenderer, input, initInput, webRenderers } from 'react-imperative-prompt';
 
 // Initialize once at app startup
 initInput({
@@ -39,11 +39,13 @@ initInput({
   defaultRenderer: 'text',
 });
 
-// Wrap your app with InputProvider
+// Wrap your app with InputProvider and place PromptInputRenderer anywhere
 function App() {
   return (
     <InputProvider>
       <YourApp />
+      {/* Place the renderer anywhere in your app */}
+      <PromptInputRenderer />
     </InputProvider>
   );
 }
@@ -132,13 +134,27 @@ initInput({
 
 #### `InputProvider`
 
-React component that renders the current prompt. Must wrap your application.
+React context provider that manages the input system state. Must wrap your application.
 
 ```tsx
 <InputProvider>
   {children}
 </InputProvider>
 ```
+
+#### `PromptInputRenderer`
+
+React component that renders the current prompt. Can be placed anywhere within the InputProvider.
+
+```tsx
+<PromptInputRenderer 
+  renderEntireQueue={false}  // Optional: render all queued prompts
+/>
+```
+
+**Props:**
+- `renderEntireQueue` (optional): When `true`, renders all queued prompts. When `false` (default), only renders the current active prompt.
+- `prioritizeAwaitingInputs` (optional): When `true`, awaiting inputs (like `input.text()`) will take priority over display inputs, temporarily suspending displays to handle user inputs.
 
 ### Input Methods
 
@@ -296,6 +312,129 @@ const result = await input.text({
 if (result === null) {
   console.log('Input was cancelled or timed out');
 }
+```
+
+## 🎯 Flexible Placement
+
+The `PromptInputRenderer` component can be placed anywhere within your application, allowing for complete control over where prompts appear.
+
+### Fixed Bottom Panel
+
+```tsx
+<InputProvider>
+  <MainContent />
+  <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0 }}>
+    <PromptInputRenderer />
+  </div>
+</InputProvider>
+```
+
+### Modal Overlay
+
+```tsx
+<InputProvider>
+  <App />
+  <ModalOverlay>
+    <PromptInputRenderer />
+  </ModalOverlay>
+</InputProvider>
+```
+
+### Queue Visualization
+
+Show all queued prompts with reduced opacity for inactive ones:
+
+```tsx
+<InputProvider>
+  <div>
+    <h2>Active Prompt</h2>
+    <PromptInputRenderer />
+  </div>
+  <div>
+    <h2>All Queued Prompts</h2>
+    <PromptInputRenderer renderEntireQueue={true} />
+  </div>
+</InputProvider>
+```
+
+### Multiple Renderers
+
+You can have multiple `PromptInputRenderer` components with different configurations:
+
+```tsx
+<InputProvider>
+  <Sidebar>
+    {/* Only show current prompt in sidebar */}
+    <PromptInputRenderer />
+  </Sidebar>
+  <MainArea>
+    {/* Show entire queue in main area */}
+    <PromptInputRenderer renderEntireQueue={true} />
+  </MainArea>
+</InputProvider>
+```
+
+## ⚡ Priority-Based Queueing
+
+The system supports priority-based queueing, allowing critical inputs to take precedence over background displays.
+
+### Enabling Priority Mode
+
+```tsx
+<PromptInputRenderer prioritizeAwaitingInputs={true} />
+```
+
+### Setting Custom Priorities
+
+```typescript
+// High priority input (default: 10 when prioritizeAwaitingInputs is true)
+const urgentInput = await input({
+  message: 'Enter security code:',
+  priority: 20, // Higher number = higher priority
+});
+
+// Low priority display (default: 0)
+const monitor = display({
+  message: 'System monitor',
+  priority: 0, // Will be suspended for higher priority inputs
+});
+
+// Medium priority input
+const normalInput = await input({
+  message: 'Enter your name:',
+  priority: 5,
+});
+```
+
+### Priority Behavior
+
+When `prioritizeAwaitingInputs` is enabled:
+- Awaiting inputs (using `await input()`) automatically get priority 10
+- Display prompts get priority 0 by default
+- Higher priority prompts suspend lower priority displays
+- Suspended displays automatically resume when queue is clear
+
+### Use Cases
+
+- **Interrupting long operations**: Suspend status displays for urgent user inputs
+- **Security prompts**: Ensure authentication takes precedence
+- **Critical alerts**: Handle important notifications immediately
+- **Background monitoring**: Show system status without blocking user interaction
+
+```tsx
+// Example: Chat with interrupt support
+const streamResponse = display({
+  message: 'AI typing...',
+  priority: 0, // Can be interrupted
+});
+
+// This will suspend the display
+const urgentQuestion = await input({
+  message: 'Interrupt with urgent question:',
+  priority: 15, // Takes over immediately
+});
+
+// Display resumes automatically after input is resolved
 ```
 
 ## 🎨 Creating Custom Renderers
