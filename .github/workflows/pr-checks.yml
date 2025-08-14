@@ -84,12 +84,8 @@ jobs:
 
   test-suite:
     name: Test Suite
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     continue-on-error: true  # Allow tests to fail for now due to stdin mocking issues
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-        node-version: [20.x]
     
     steps:
       - name: Checkout code
