@@ -83,8 +83,8 @@ describe('Integration Tests', () => {
 
       // Check result
       await waitFor(() => {
-        const el = screen.queryByTestId('result');
-        return el && el.textContent === 'Hello, John Doe!' ? el : null;
+        const el = screen.queryByTestId('result')
+        return el && el.textContent === 'Hello, John Doe!' ? el : null
       })
     })
 
@@ -162,8 +162,8 @@ describe('Integration Tests', () => {
 
       // Check final result
       await waitFor(() => {
-        const el = screen.queryByTestId('result');
-        return el && el.textContent === 'Jane, jane@example.com, 25' ? el : null;
+        const el = screen.queryByTestId('result')
+        return el && el.textContent === 'Jane, jane@example.com, 25' ? el : null
       })
     })
 
@@ -203,8 +203,8 @@ describe('Integration Tests', () => {
       fireEvent.click(screen.getByText('Cancel'))
 
       await waitFor(() => {
-        const el = screen.queryByTestId('result');
-        return el && el.textContent === 'Cancelled' ? el : null;
+        const el = screen.queryByTestId('result')
+        return el && el.textContent === 'Cancelled' ? el : null
       })
     })
 
@@ -267,8 +267,8 @@ describe('Integration Tests', () => {
 
       // Check results
       await waitFor(() => {
-        const el = screen.queryByTestId('result');
-        return el && el.textContent === 'A, B, C' ? el : null;
+        const el = screen.queryByTestId('result')
+        return el && el.textContent === 'A, B, C' ? el : null
       })
     })
 
@@ -309,8 +309,8 @@ describe('Integration Tests', () => {
       await new Promise((resolve) => setTimeout(resolve, 100))
 
       await waitFor(() => {
-        const el = screen.queryByTestId('result');
-        return el && el.textContent === 'Timed out' ? el : null;
+        const el = screen.queryByTestId('result')
+        return el && el.textContent === 'Timed out' ? el : null
       })
     })
 
@@ -360,8 +360,8 @@ describe('Integration Tests', () => {
       fireEvent.click(screen.getByTestId('abort'))
 
       await waitFor(() => {
-        const el = screen.queryByTestId('result');
-        return el && el.textContent === 'Aborted' ? el : null;
+        const el = screen.queryByTestId('result')
+        return el && el.textContent === 'Aborted' ? el : null
       })
     })
 
@@ -406,8 +406,8 @@ describe('Integration Tests', () => {
       fireEvent.click(screen.getByText('Submit'))
 
       await waitFor(() => {
-        const el = screen.queryByTestId('result');
-        return el && el.textContent === 'Password set' ? el : null;
+        const el = screen.queryByTestId('result')
+        return el && el.textContent === 'Password set' ? el : null
       })
     })
 
@@ -453,8 +453,8 @@ describe('Integration Tests', () => {
       fireEvent.click(screen.getByText('Submit'))
 
       await waitFor(() => {
-        const el = screen.queryByTestId('result');
-        return el && el.textContent === 'Age: 25' ? el : null;
+        const el = screen.queryByTestId('result')
+        return el && el.textContent === 'Age: 25' ? el : null
       })
     })
   })
@@ -493,8 +493,8 @@ describe('Integration Tests', () => {
       fireEvent.click(screen.getByTestId('trigger-missing'))
 
       await waitFor(() => {
-        const el = screen.queryByTestId('result');
-        return el && el.textContent === 'Handled missing renderer' ? el : null;
+        const el = screen.queryByTestId('result')
+        return el && el.textContent === 'Handled missing renderer' ? el : null
       })
 
       expect(consoleSpy).toHaveBeenCalledWith('No renderer for kind: nonexistent')

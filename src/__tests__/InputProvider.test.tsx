@@ -94,7 +94,7 @@ describe('InputProvider', () => {
     inputManager.input({ message: 'Test Message', kind: 'test' })
 
     await waitFor(() => screen.queryByTestId('test-renderer'))
-    
+
     expect(screen.getByTestId('test-renderer')).toBeTruthy()
     expect(screen.getByTestId('message').textContent).toBe('Test Message')
     expect(screen.getByTestId('child')).toBeTruthy() // Children still rendered
@@ -113,7 +113,7 @@ describe('InputProvider', () => {
     inputManager.input({ message: 'Third' })
 
     await waitFor(() => screen.queryByTestId('queue-length'))
-    
+
     expect(screen.getByTestId('queue-length').textContent).toBe('2')
   })
 
@@ -134,7 +134,7 @@ describe('InputProvider', () => {
     expect(result).toBe('test-value')
 
     await waitFor(() => !screen.queryByTestId('test-renderer'))
-    
+
     expect(screen.queryByTestId('test-renderer')).toBeNull()
   })
 
@@ -155,7 +155,7 @@ describe('InputProvider', () => {
     expect(result).toBeNull()
 
     await waitFor(() => !screen.queryByTestId('test-renderer'))
-    
+
     expect(screen.queryByTestId('test-renderer')).toBeNull()
   })
 
@@ -171,8 +171,8 @@ describe('InputProvider', () => {
     const promise = inputManager.input({ message: 'Test', kind: 'missing' })
 
     // Wait a moment for the component to process
-    await new Promise(resolve => setTimeout(resolve, 100))
-    
+    await new Promise((resolve) => setTimeout(resolve, 100))
+
     expect(consoleSpy).toHaveBeenCalledWith('No renderer for kind: missing')
     expect(screen.queryByTestId('test-renderer')).toBeNull()
     expect(screen.getByTestId('child')).toBeTruthy()
@@ -209,7 +209,7 @@ describe('InputProvider', () => {
     await promise2
 
     await waitFor(() => !screen.queryByTestId('test-renderer'))
-    
+
     expect(screen.queryByTestId('test-renderer')).toBeNull()
   })
 
@@ -277,7 +277,7 @@ describe('InputProvider', () => {
     const promise = inputManager.input({ message: 'Default Test' })
 
     await waitFor(() => screen.queryByTestId('test-renderer'))
-    
+
     expect(screen.getByTestId('test-renderer')).toBeTruthy()
     expect(screen.getByTestId('message').textContent).toBe('Default Test')
 

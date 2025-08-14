@@ -1,6 +1,7 @@
 // Setup for Ink tests - mocks stdin methods required by ink-text-input
-import { EventEmitter } from 'events'
+
 import { mock } from 'bun:test'
+import { EventEmitter } from 'events'
 
 // Create a mock stdin that extends EventEmitter
 class MockStdin extends EventEmitter {
@@ -12,7 +13,7 @@ class MockStdin extends EventEmitter {
   resume = mock(() => this)
   read = mock(() => null)
   isTTY = true
-  
+
   // Add pipe method
   pipe = mock((destination: any) => destination)
 }
@@ -24,5 +25,5 @@ const mockStdin = new MockStdin()
 Object.defineProperty(process, 'stdin', {
   value: mockStdin,
   writable: true,
-  configurable: true
+  configurable: true,
 })

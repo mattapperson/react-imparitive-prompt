@@ -11,7 +11,7 @@ export function InputProvider({ children }: { children: React.ReactNode }) {
     // Set initial state
     setCurrent(inputManager.getCurrentPrompt())
     setQLen(inputManager.getQueueLength())
-    
+
     // Subscribe to updates
     const unsubscribe = inputManager.subscribe(() => {
       setCurrent(inputManager.getCurrentPrompt())
