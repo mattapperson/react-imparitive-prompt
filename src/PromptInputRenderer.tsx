@@ -1,7 +1,7 @@
 // PromptInputRenderer.tsx
 import React from 'react'
 import { inputManager } from './inputManager'
-import type { InputPrompt } from './types'
+import type { InputPrompt, DisplayPrompt } from './types'
 
 export interface PromptInputRendererProps {
   /** When true, renders all queued prompts. When false, only renders the current prompt */
@@ -10,12 +10,12 @@ export interface PromptInputRendererProps {
   prioritizeAwaitingInputs?: boolean
 }
 
-export function PromptInputRenderer({ 
+export function PromptInputRenderer({
   renderEntireQueue = false,
-  prioritizeAwaitingInputs = false 
+  prioritizeAwaitingInputs = false,
 }: PromptInputRendererProps) {
-  const [current, setCurrent] = React.useState<InputPrompt<any> | null>(null)
-  const [queue, setQueue] = React.useState<InputPrompt<any>[]>([])
+  const [current, setCurrent] = React.useState<InputPrompt<any> | DisplayPrompt<any> | null>(null)
+  const [queue, setQueue] = React.useState<(InputPrompt<any> | DisplayPrompt<any>)[]>([])
   const [qLen, setQLen] = React.useState<number>(0)
 
   React.useEffect(() => {
@@ -48,7 +48,7 @@ export function PromptInputRenderer({
   if (renderEntireQueue) {
     // Render all prompts (current + queued)
     const allPrompts = current ? [current, ...queue] : queue
-    
+
     if (allPrompts.length === 0) return null
 
     return (
@@ -61,7 +61,7 @@ export function PromptInputRenderer({
           }
 
           const isActive = index === 0 && current?.id === prompt.id
-          
+
           return (
             <div key={prompt.id} style={{ opacity: isActive ? 1 : 0.5 }}>
               <Renderer

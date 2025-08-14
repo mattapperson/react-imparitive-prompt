@@ -1,9 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
 import { cleanup, render } from '@testing-library/react'
-import React from 'react'
 import { InputProvider } from '../InputProvider'
+import { display, input, inputManager } from '../inputManager'
 import { PromptInputRenderer } from '../PromptInputRenderer'
-import { inputManager, display, input } from '../inputManager'
 import type { InputConfig, RendererProps } from '../types'
 import { screen, waitFor } from './test-utils'
 
@@ -31,12 +30,14 @@ describe('Priority Queue Tests', () => {
     }
 
     // Initialize with a test renderer
-    const TestRenderer = ({ prompt, queueLength }: RendererProps<any>) => {
+    const TestRenderer = ({ prompt }: RendererProps<any>) => {
       return (
         <div data-testid={`test-renderer-${prompt.id}`}>
           <div data-testid={`message-${prompt.id}`}>{prompt.message}</div>
           <div data-testid={`priority-${prompt.id}`}>{prompt.priority ?? 0}</div>
-          <div data-testid={`type-${prompt.id}`}>{prompt.type || 'input'}</div>
+          <div data-testid={`type-${prompt.id}`}>
+            {'type' in prompt && prompt.type === 'display' ? 'display' : 'input'}
+          </div>
         </div>
       )
     }
@@ -59,7 +60,7 @@ describe('Priority Queue Tests', () => {
     render(
       <InputProvider>
         <PromptInputRenderer prioritizeAwaitingInputs={true} />
-      </InputProvider>
+      </InputProvider>,
     )
 
     // Start a display prompt
@@ -72,7 +73,7 @@ describe('Priority Queue Tests', () => {
     expect(screen.queryByText('Display message')).toBeTruthy()
 
     // Now add an awaiting input - it should take priority
-    const inputPromise = input({
+    void input({
       message: 'High priority input',
     })
 
@@ -99,7 +100,7 @@ describe('Priority Queue Tests', () => {
     render(
       <InputProvider>
         <PromptInputRenderer prioritizeAwaitingInputs={false} />
-      </InputProvider>
+      </InputProvider>,
     )
 
     // Start a display prompt
@@ -112,12 +113,12 @@ describe('Priority Queue Tests', () => {
     expect(screen.queryByText('Display message')).toBeTruthy()
 
     // Add an awaiting input - it should NOT take priority
-    const inputPromise = input({
+    void input({
       message: 'Normal priority input',
     })
 
     // Give it a moment to process
-    await new Promise(resolve => setTimeout(resolve, 100))
+    await new Promise((resolve) => setTimeout(resolve, 100))
 
     // Display should still be showing
     expect(screen.queryByText('Display message')).toBeTruthy()
@@ -141,21 +142,21 @@ describe('Priority Queue Tests', () => {
     render(
       <InputProvider>
         <PromptInputRenderer />
-      </InputProvider>
+      </InputProvider>,
     )
 
     // Add multiple inputs with different priorities
-    const promise1 = input({
+    void input({
       message: 'Low priority',
       priority: 1,
     })
 
-    const promise2 = input({
+    void input({
       message: 'High priority',
       priority: 10,
     })
 
-    const promise3 = input({
+    void input({
       message: 'Medium priority',
       priority: 5,
     })
@@ -195,16 +196,16 @@ describe('Priority Queue Tests', () => {
     render(
       <InputProvider>
         <PromptInputRenderer renderEntireQueue={true} />
-      </InputProvider>
+      </InputProvider>,
     )
 
     // Add initial low priority items
-    const promise1 = input({
+    void input({
       message: 'First low',
       priority: 1,
     })
 
-    const promise2 = input({
+    void input({
       message: 'Second low',
       priority: 1,
     })
@@ -212,7 +213,7 @@ describe('Priority Queue Tests', () => {
     await waitFor(() => screen.queryAllByTestId(/test-renderer/).length === 2)
 
     // Add a high priority item - it should jump to the front of the queue
-    const promise3 = input({
+    void input({
       message: 'High priority',
       priority: 10,
     })
@@ -220,7 +221,7 @@ describe('Priority Queue Tests', () => {
     await waitFor(() => screen.queryAllByTestId(/test-renderer/).length === 3)
 
     // The first item is already current, so high priority goes to front of queue (position 1)
-    const messages = screen.queryAllByTestId(/message-/).map(el => el.textContent)
+    const messages = screen.queryAllByTestId(/message-/).map((el: HTMLElement) => el.textContent)
     expect(messages[0]).toBe('First low') // Current stays current
     expect(messages[1]).toBe('High priority') // High priority at front of queue
     expect(messages[2]).toBe('Second low')
@@ -238,7 +239,7 @@ describe('Priority Queue Tests', () => {
     render(
       <InputProvider>
         <PromptInputRenderer prioritizeAwaitingInputs={true} />
-      </InputProvider>
+      </InputProvider>,
     )
 
     // Start a display prompt
@@ -251,12 +252,12 @@ describe('Priority Queue Tests', () => {
     expect(screen.queryByText('Display to suspend')).toBeTruthy()
 
     // Add multiple high priority inputs
-    const input1 = input({
+    void input({
       message: 'First high priority',
       priority: 10,
     })
 
-    const input2 = input({
+    void input({
       message: 'Second high priority',
       priority: 10,
     })

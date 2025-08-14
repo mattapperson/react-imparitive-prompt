@@ -1,65 +1,65 @@
 /**
  * Example demonstrating priority-based input rendering
- * 
+ *
  * Shows how awaiting inputs can take priority over display inputs,
  * temporarily suspending displays to handle critical user inputs.
  */
 
 import React from 'react'
-import { 
-  InputProvider, 
-  PromptInputRenderer, 
-  initInput, 
-  input,
-  display 
-} from '../src'
+import { display, InputProvider, initInput, input, PromptInputRenderer } from '../src'
 import type { RendererProps } from '../src/types'
 
 // Custom renderer that shows the type and priority
-const PriorityRenderer: React.FC<RendererProps<any>> = ({ 
-  prompt, 
-  queueLength, 
-  onSubmit, 
+const PriorityRenderer: React.FC<RendererProps<any>> = ({
+  prompt,
+  queueLength,
+  onSubmit,
   onCancel,
-  onUpdate 
+  onUpdate,
 }) => {
   const [value, setValue] = React.useState('')
   const isDisplay = 'type' in prompt && prompt.type === 'display'
   const priority = prompt.priority ?? 0
 
   return (
-    <div style={{ 
-      padding: '15px', 
-      border: `2px solid ${isDisplay ? '#4CAF50' : '#2196F3'}`,
-      borderRadius: '8px',
-      marginBottom: '10px',
-      backgroundColor: isDisplay ? '#E8F5E9' : '#E3F2FD'
-    }}>
+    <div
+      style={{
+        padding: '15px',
+        border: `2px solid ${isDisplay ? '#4CAF50' : '#2196F3'}`,
+        borderRadius: '8px',
+        marginBottom: '10px',
+        backgroundColor: isDisplay ? '#E8F5E9' : '#E3F2FD',
+      }}
+    >
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
         <strong>{prompt.message}</strong>
         <div>
-          <span style={{ 
-            padding: '2px 8px', 
-            borderRadius: '4px',
-            backgroundColor: isDisplay ? '#4CAF50' : '#2196F3',
-            color: 'white',
-            fontSize: '12px',
-            marginRight: '10px'
-          }}>
+          <span
+            style={{
+              padding: '2px 8px',
+              borderRadius: '4px',
+              backgroundColor: isDisplay ? '#4CAF50' : '#2196F3',
+              color: 'white',
+              fontSize: '12px',
+              marginRight: '10px',
+            }}
+          >
             {isDisplay ? 'DISPLAY' : 'INPUT'}
           </span>
-          <span style={{ 
-            padding: '2px 8px', 
-            borderRadius: '4px',
-            backgroundColor: '#FF9800',
-            color: 'white',
-            fontSize: '12px'
-          }}>
+          <span
+            style={{
+              padding: '2px 8px',
+              borderRadius: '4px',
+              backgroundColor: '#FF9800',
+              color: 'white',
+              fontSize: '12px',
+            }}
+          >
             Priority: {priority}
           </span>
         </div>
       </div>
-      
+
       {!isDisplay && (
         <>
           <input
@@ -70,8 +70,12 @@ const PriorityRenderer: React.FC<RendererProps<any>> = ({
             style={{ width: '100%', padding: '5px', marginBottom: '10px' }}
           />
           <div>
-            <button onClick={() => onSubmit(value)}>Submit</button>
-            <button onClick={onCancel} style={{ marginLeft: '10px' }}>Cancel</button>
+            <button type="button" onClick={() => onSubmit(value)}>
+              Submit
+            </button>
+            <button type="button" onClick={onCancel} style={{ marginLeft: '10px' }}>
+              Cancel
+            </button>
             {queueLength > 0 && (
               <span style={{ marginLeft: '10px', color: '#666' }}>
                 ({queueLength} more in queue)
@@ -80,12 +84,16 @@ const PriorityRenderer: React.FC<RendererProps<any>> = ({
           </div>
         </>
       )}
-      
+
       {isDisplay && (
         <div>
           <p>Current value: {prompt.currentValue || 'None'}</p>
-          <button onClick={() => onUpdate && onUpdate('Updated!')}>Update Display</button>
-          <button onClick={onCancel} style={{ marginLeft: '10px' }}>Close Display</button>
+          <button type="button" onClick={() => onUpdate?.('Updated!')}>
+            Update Display
+          </button>
+          <button type="button" onClick={onCancel} style={{ marginLeft: '10px' }}>
+            Close Display
+          </button>
         </div>
       )}
     </div>
@@ -103,9 +111,9 @@ initInput({
 // Example 1: Basic Priority Demo
 export const BasicPriorityExample = () => {
   const [log, setLog] = React.useState<string[]>([])
-  
+
   const addLog = (message: string) => {
-    setLog(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`])
+    setLog((prev) => [...prev, `${new Date().toLocaleTimeString()}: ${message}`])
   }
 
   const startDisplayMonitor = async () => {
@@ -114,7 +122,7 @@ export const BasicPriorityExample = () => {
       message: 'System Monitor (Low Priority)',
       kind: 'priority',
       priority: 0, // Low priority
-      initialValue: 'Monitoring...'
+      initialValue: 'Monitoring...',
     })
 
     // Simulate updates
@@ -127,7 +135,7 @@ export const BasicPriorityExample = () => {
     for await (const value of handle.submitted) {
       addLog(`Display updated: ${value}`)
     }
-    
+
     clearInterval(interval)
     addLog('Display monitor stopped')
   }
@@ -138,7 +146,7 @@ export const BasicPriorityExample = () => {
       message: 'URGENT: Enter authorization code',
       kind: 'priority',
       priority: 10, // High priority - will suspend display
-      placeholder: 'Enter code...'
+      placeholder: 'Enter code...',
     })
     addLog(`Urgent input received: ${result}`)
   }
@@ -149,7 +157,7 @@ export const BasicPriorityExample = () => {
       message: 'Normal: Enter your name',
       kind: 'priority',
       priority: 5, // Medium priority
-      placeholder: 'Enter name...'
+      placeholder: 'Enter name...',
     })
     addLog(`Normal input received: ${result}`)
   }
@@ -158,16 +166,16 @@ export const BasicPriorityExample = () => {
     <InputProvider>
       <div style={{ padding: '20px' }}>
         <h1>Priority-Based Input System</h1>
-        
+
         <div style={{ marginBottom: '20px' }}>
           <h2>Actions</h2>
-          <button onClick={startDisplayMonitor} style={{ marginRight: '10px' }}>
+          <button type="button" onClick={startDisplayMonitor} style={{ marginRight: '10px' }}>
             Start Display Monitor (Priority: 0)
           </button>
-          <button onClick={requestNormalInput} style={{ marginRight: '10px' }}>
+          <button type="button" onClick={requestNormalInput} style={{ marginRight: '10px' }}>
             Request Normal Input (Priority: 5)
           </button>
-          <button onClick={requestUrgentInput}>
+          <button type="button" onClick={requestUrgentInput}>
             Request Urgent Input (Priority: 10)
           </button>
         </div>
@@ -179,15 +187,20 @@ export const BasicPriorityExample = () => {
 
         <div>
           <h2>Event Log</h2>
-          <div style={{ 
-            backgroundColor: '#f5f5f5', 
-            padding: '10px',
-            borderRadius: '4px',
-            maxHeight: '200px',
-            overflowY: 'auto'
-          }}>
+          <div
+            style={{
+              backgroundColor: '#f5f5f5',
+              padding: '10px',
+              borderRadius: '4px',
+              maxHeight: '200px',
+              overflowY: 'auto',
+            }}
+          >
             {log.map((entry, i) => (
-              <div key={i} style={{ fontFamily: 'monospace', fontSize: '12px' }}>
+              <div
+                key={`log-${i}-${entry.substring(0, 10)}`}
+                style={{ fontFamily: 'monospace', fontSize: '12px' }}
+              >
                 {entry}
               </div>
             ))}
@@ -200,7 +213,7 @@ export const BasicPriorityExample = () => {
 
 // Example 2: Real-world Scenario - Chat with Interrupts
 export const ChatWithInterruptsExample = () => {
-  const [messages, setMessages] = React.useState<Array<{role: string, text: string}>>([])
+  const [messages, setMessages] = React.useState<Array<{ role: string; text: string }>>([])
   const [isStreaming, setIsStreaming] = React.useState(false)
 
   const startChatStream = async () => {
@@ -208,21 +221,22 @@ export const ChatWithInterruptsExample = () => {
     const handle = display({
       message: 'AI Assistant Response Stream',
       priority: 0, // Low priority - can be interrupted
-      initialValue: 'Thinking...'
+      initialValue: 'Thinking...',
     })
 
     // Simulate streaming response
-    const fullResponse = "This is a long response that simulates an AI assistant typing out a detailed answer to your question. It contains multiple sentences and takes time to complete."
+    const fullResponse =
+      'This is a long response that simulates an AI assistant typing out a detailed answer to your question. It contains multiple sentences and takes time to complete.'
     const words = fullResponse.split(' ')
-    
+
     let currentText = ''
     for (const word of words) {
-      await new Promise(resolve => setTimeout(resolve, 200))
+      await new Promise((resolve) => setTimeout(resolve, 200))
       currentText += (currentText ? ' ' : '') + word
       handle.update(currentText)
     }
 
-    setMessages(prev => [...prev, { role: 'Assistant', text: currentText }])
+    setMessages((prev) => [...prev, { role: 'Assistant', text: currentText }])
     handle.cancel()
     setIsStreaming(false)
   }
@@ -233,9 +247,9 @@ export const ChatWithInterruptsExample = () => {
       placeholder: 'Type your question...',
       priority: 10, // High priority - interrupts streaming
     })
-    
+
     if (question) {
-      setMessages(prev => [...prev, { role: 'You', text: question }])
+      setMessages((prev) => [...prev, { role: 'You', text: question }])
       // Start streaming response
       startChatStream()
     }
@@ -247,9 +261,9 @@ export const ChatWithInterruptsExample = () => {
       placeholder: 'What needs clarification?',
       priority: 15, // Very high priority - interrupts everything
     })
-    
+
     if (clarification) {
-      setMessages(prev => [...prev, { role: 'Clarification', text: clarification }])
+      setMessages((prev) => [...prev, { role: 'Clarification', text: clarification }])
     }
   }
 
@@ -257,12 +271,17 @@ export const ChatWithInterruptsExample = () => {
     <InputProvider>
       <div style={{ padding: '20px', maxWidth: '800px' }}>
         <h1>Chat with Interrupt Support</h1>
-        
+
         <div style={{ marginBottom: '20px' }}>
-          <button onClick={askQuestion} disabled={isStreaming} style={{ marginRight: '10px' }}>
+          <button
+            type="button"
+            onClick={askQuestion}
+            disabled={isStreaming}
+            style={{ marginRight: '10px' }}
+          >
             Ask Question
           </button>
-          <button onClick={requestClarification} style={{ marginRight: '10px' }}>
+          <button type="button" onClick={requestClarification} style={{ marginRight: '10px' }}>
             Interrupt for Clarification
           </button>
           {isStreaming && <span>AI is typing...</span>}
@@ -275,22 +294,31 @@ export const ChatWithInterruptsExample = () => {
 
         <div>
           <h2>Chat History</h2>
-          <div style={{ 
-            border: '1px solid #ccc',
-            borderRadius: '4px',
-            padding: '10px',
-            height: '300px',
-            overflowY: 'auto',
-            backgroundColor: 'white'
-          }}>
+          <div
+            style={{
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              padding: '10px',
+              height: '300px',
+              overflowY: 'auto',
+              backgroundColor: 'white',
+            }}
+          >
             {messages.map((msg, i) => (
-              <div key={i} style={{ 
-                marginBottom: '10px',
-                padding: '8px',
-                borderRadius: '4px',
-                backgroundColor: msg.role === 'You' ? '#E3F2FD' : 
-                                msg.role === 'Clarification' ? '#FFF3E0' : '#F5F5F5'
-              }}>
+              <div
+                key={`msg-${i}-${msg.role}`}
+                style={{
+                  marginBottom: '10px',
+                  padding: '8px',
+                  borderRadius: '4px',
+                  backgroundColor:
+                    msg.role === 'You'
+                      ? '#E3F2FD'
+                      : msg.role === 'Clarification'
+                        ? '#FFF3E0'
+                        : '#F5F5F5',
+                }}
+              >
                 <strong>{msg.role}:</strong> {msg.text}
               </div>
             ))}
@@ -309,26 +337,26 @@ export const QueueVisualizationWithPriorities = () => {
       message: 'Low: Enter email',
       priority: 1,
     })
-    
+
     input({
       message: 'Medium: Enter phone',
       priority: 5,
     })
-    
+
     input({
       message: 'High: Enter verification code',
       priority: 10,
     })
-    
+
     input({
       message: 'Critical: Security check',
       priority: 20,
     })
-    
+
     display({
       message: 'Background: System status',
       priority: 0,
-      initialValue: 'All systems operational'
+      initialValue: 'All systems operational',
     })
   }
 
@@ -336,8 +364,8 @@ export const QueueVisualizationWithPriorities = () => {
     <InputProvider>
       <div style={{ padding: '20px' }}>
         <h1>Priority Queue Visualization</h1>
-        
-        <button onClick={createMultipleTasks} style={{ marginBottom: '20px' }}>
+
+        <button type="button" onClick={createMultipleTasks} style={{ marginBottom: '20px' }}>
           Create Multiple Priority Tasks
         </button>
 
@@ -346,14 +374,11 @@ export const QueueVisualizationWithPriorities = () => {
             <h2>Current Active (Highest Priority)</h2>
             <PromptInputRenderer prioritizeAwaitingInputs={true} />
           </div>
-          
+
           <div style={{ flex: 1 }}>
             <h2>Full Queue (All Priorities)</h2>
             <div style={{ opacity: 0.7 }}>
-              <PromptInputRenderer 
-                prioritizeAwaitingInputs={true} 
-                renderEntireQueue={true} 
-              />
+              <PromptInputRenderer prioritizeAwaitingInputs={true} renderEntireQueue={true} />
             </div>
           </div>
         </div>

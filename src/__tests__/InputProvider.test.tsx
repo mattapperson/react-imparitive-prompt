@@ -8,8 +8,8 @@ const jest = {
 import { cleanup, render } from '@testing-library/react'
 import React from 'react'
 import { InputProvider } from '../InputProvider'
-import { PromptInputRenderer } from '../PromptInputRenderer'
 import { inputManager } from '../inputManager'
+import { PromptInputRenderer } from '../PromptInputRenderer'
 import type { InputConfig, RendererProps } from '../types'
 import { fireEvent, screen, waitFor } from './test-utils'
 

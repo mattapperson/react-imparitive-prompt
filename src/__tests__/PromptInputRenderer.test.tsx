@@ -1,8 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
 import { cleanup, render } from '@testing-library/react'
-import React from 'react'
-import { PromptInputRenderer } from '../PromptInputRenderer'
 import { inputManager } from '../inputManager'
+import { PromptInputRenderer } from '../PromptInputRenderer'
 import type { InputConfig, RendererProps } from '../types'
 import { screen, waitFor } from './test-utils'
 
@@ -62,9 +61,9 @@ describe('PromptInputRenderer', () => {
     render(<PromptInputRenderer />)
 
     // Add multiple prompts
-    const promise1 = inputManager.input({ message: 'First' })
-    const promise2 = inputManager.input({ message: 'Second' })
-    const promise3 = inputManager.input({ message: 'Third' })
+    void inputManager.input({ message: 'First' })
+    void inputManager.input({ message: 'Second' })
+    void inputManager.input({ message: 'Third' })
 
     await waitFor(() => screen.queryByTestId(/test-renderer/))
 
@@ -78,9 +77,9 @@ describe('PromptInputRenderer', () => {
     render(<PromptInputRenderer renderEntireQueue={true} />)
 
     // Add multiple prompts
-    const promise1 = inputManager.input({ message: 'First' })
-    const promise2 = inputManager.input({ message: 'Second' })
-    const promise3 = inputManager.input({ message: 'Third' })
+    void inputManager.input({ message: 'First' })
+    void inputManager.input({ message: 'Second' })
+    void inputManager.input({ message: 'Third' })
 
     await waitFor(() => screen.queryAllByTestId(/test-renderer/).length === 3)
 
@@ -89,15 +88,15 @@ describe('PromptInputRenderer', () => {
     expect(renderers.length).toBe(3)
 
     // Check messages are rendered
-    const messages = screen.queryAllByTestId(/message-/).map(el => el.textContent)
+    const messages = screen.queryAllByTestId(/message-/).map((el: HTMLElement) => el.textContent)
     expect(messages).toEqual(['First', 'Second', 'Third'])
   })
 
   it('should update when prompts are resolved', async () => {
     render(<PromptInputRenderer />)
 
-    const promise1 = inputManager.input({ message: 'First' })
-    const promise2 = inputManager.input({ message: 'Second' })
+    void inputManager.input({ message: 'First' })
+    void inputManager.input({ message: 'Second' })
 
     await waitFor(() => screen.queryByTestId(/message-/)?.textContent === 'First')
 
@@ -116,9 +115,9 @@ describe('PromptInputRenderer', () => {
     render(<PromptInputRenderer />)
 
     // Add multiple prompts
-    const promise1 = inputManager.input({ message: 'First' })
-    const promise2 = inputManager.input({ message: 'Second' })
-    const promise3 = inputManager.input({ message: 'Third' })
+    void inputManager.input({ message: 'First' })
+    void inputManager.input({ message: 'Second' })
+    void inputManager.input({ message: 'Third' })
 
     await waitFor(() => screen.queryByTestId(/queue-/))
 
@@ -129,8 +128,8 @@ describe('PromptInputRenderer', () => {
   it('should apply opacity to inactive prompts in queue mode', async () => {
     const { container } = render(<PromptInputRenderer renderEntireQueue={true} />)
 
-    const promise1 = inputManager.input({ message: 'First' })
-    const promise2 = inputManager.input({ message: 'Second' })
+    void inputManager.input({ message: 'First' })
+    void inputManager.input({ message: 'Second' })
 
     await waitFor(() => screen.queryAllByTestId(/test-renderer/).length === 2)
 
@@ -138,7 +137,7 @@ describe('PromptInputRenderer', () => {
     const divs = container.querySelectorAll('div[style]')
     const firstDiv = divs[0] as HTMLElement
     const secondDiv = divs[1] as HTMLElement
-    
+
     expect(firstDiv.style.opacity).toBe('1')
     expect(secondDiv.style.opacity).toBe('0.5')
   })
@@ -161,7 +160,8 @@ describe('PromptInputRenderer', () => {
     unmount()
 
     // @ts-ignore - accessing private property for testing
-    const afterUnmountCount = (inputManager as unknown as { listeners: Set<unknown> }).listeners.size
+    const afterUnmountCount = (inputManager as unknown as { listeners: Set<unknown> }).listeners
+      .size
     expect(afterUnmountCount).toBe(beforeMountCount)
   })
 })
