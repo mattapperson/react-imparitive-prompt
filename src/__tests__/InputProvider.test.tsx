@@ -8,6 +8,7 @@ const jest = {
 import { cleanup, render } from '@testing-library/react'
 import React from 'react'
 import { InputProvider } from '../InputProvider'
+import { PromptInputRenderer } from '../PromptInputRenderer'
 import { inputManager } from '../inputManager'
 import type { InputConfig, RendererProps } from '../types'
 import { fireEvent, screen, waitFor } from './test-utils'
@@ -76,6 +77,7 @@ describe('InputProvider', () => {
     render(
       <InputProvider>
         <div data-testid="child">Child Content</div>
+        <PromptInputRenderer />
       </InputProvider>,
     )
 
@@ -87,6 +89,7 @@ describe('InputProvider', () => {
     render(
       <InputProvider>
         <div data-testid="child">Child Content</div>
+        <PromptInputRenderer />
       </InputProvider>,
     )
 
@@ -104,6 +107,7 @@ describe('InputProvider', () => {
     render(
       <InputProvider>
         <div>Content</div>
+        <PromptInputRenderer />
       </InputProvider>,
     )
 
@@ -121,6 +125,7 @@ describe('InputProvider', () => {
     render(
       <InputProvider>
         <div>Content</div>
+        <PromptInputRenderer />
       </InputProvider>,
     )
 
@@ -142,6 +147,7 @@ describe('InputProvider', () => {
     render(
       <InputProvider>
         <div>Content</div>
+        <PromptInputRenderer />
       </InputProvider>,
     )
 
@@ -165,6 +171,7 @@ describe('InputProvider', () => {
     render(
       <InputProvider>
         <div data-testid="child">Content</div>
+        <PromptInputRenderer />
       </InputProvider>,
     )
 
@@ -187,6 +194,7 @@ describe('InputProvider', () => {
     render(
       <InputProvider>
         <div>Content</div>
+        <PromptInputRenderer />
       </InputProvider>,
     )
 
@@ -221,6 +229,7 @@ describe('InputProvider', () => {
     const { unmount } = render(
       <InputProvider>
         <div>Content</div>
+        <PromptInputRenderer />
       </InputProvider>,
     )
 
@@ -246,6 +255,7 @@ describe('InputProvider', () => {
           <button type="button" onClick={() => setCount((c) => c + 1)} data-testid="rerender">
             Count: {count}
           </button>
+          <PromptInputRenderer />
         </InputProvider>
       )
     }
@@ -270,6 +280,7 @@ describe('InputProvider', () => {
     render(
       <InputProvider>
         <div>Content</div>
+        <PromptInputRenderer />
       </InputProvider>,
     )
 
@@ -290,6 +301,7 @@ describe('InputProvider', () => {
     render(
       <InputProvider>
         <div>Content</div>
+        <PromptInputRenderer />
       </InputProvider>,
     )
 

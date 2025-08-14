@@ -3,6 +3,7 @@ import { cleanup, render } from '@testing-library/react'
 import React from 'react' // Used in JSX
 import * as contextInputModule from '../context/input'
 import { InputProvider } from '../InputProvider'
+import { PromptInputRenderer } from '../PromptInputRenderer'
 import * as indexModule from '../index'
 import { initInput, input, inputManager } from '../inputManager'
 import type { InputConfig } from '../types'
@@ -64,6 +65,7 @@ describe('Integration Tests', () => {
       render(
         <InputProvider>
           <TestApp />
+          <PromptInputRenderer />
         </InputProvider>,
       )
 
@@ -135,6 +137,7 @@ describe('Integration Tests', () => {
       render(
         <InputProvider>
           <TestApp />
+          <PromptInputRenderer />
         </InputProvider>,
       )
 
@@ -192,6 +195,7 @@ describe('Integration Tests', () => {
       render(
         <InputProvider>
           <TestApp />
+          <PromptInputRenderer />
         </InputProvider>,
       )
 
@@ -234,6 +238,7 @@ describe('Integration Tests', () => {
       render(
         <InputProvider>
           <TestApp />
+          <PromptInputRenderer />
         </InputProvider>,
       )
 
@@ -298,6 +303,7 @@ describe('Integration Tests', () => {
       render(
         <InputProvider>
           <TestApp />
+          <PromptInputRenderer />
         </InputProvider>,
       )
 
@@ -349,6 +355,7 @@ describe('Integration Tests', () => {
       render(
         <InputProvider>
           <TestApp />
+          <PromptInputRenderer />
         </InputProvider>,
       )
 
@@ -391,6 +398,7 @@ describe('Integration Tests', () => {
       render(
         <InputProvider>
           <TestApp />
+          <PromptInputRenderer />
         </InputProvider>,
       )
 
@@ -438,6 +446,7 @@ describe('Integration Tests', () => {
       render(
         <InputProvider>
           <TestApp />
+          <PromptInputRenderer />
         </InputProvider>,
       )
 
@@ -487,6 +496,7 @@ describe('Integration Tests', () => {
       render(
         <InputProvider>
           <TestApp />
+          <PromptInputRenderer />
         </InputProvider>,
       )
 
