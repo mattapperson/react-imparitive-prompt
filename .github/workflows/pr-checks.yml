@@ -199,7 +199,6 @@ jobs:
             | Check | Status |
             |-------|--------|
             | Code Quality | ${jobs['quality-checks'].result === 'success' ? '✅ Passed' : '❌ Failed'} |
-            | Tests | ${jobs['test-suite'].result === 'success' ? '✅ Passed' : '❌ Failed'} |
             | Build | ${jobs['build-check'].result === 'success' ? '✅ Passed' : '❌ Failed'} |
             
             ${allPassed ? '🎉 This PR is ready for review!' : '⚠️ Please fix the failing checks before merging.'}`;
