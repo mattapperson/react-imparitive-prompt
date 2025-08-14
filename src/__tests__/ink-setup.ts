@@ -1,23 +1,44 @@
 // Setup for Ink tests - mocks stdin methods required by ink-text-input
 
-// Create proper stdin mocks
-if (!process.stdin.ref) {
-  (process.stdin as any).ref = () => process.stdin;
+import { mock } from 'bun:test'
+
+// Store the original stdin to avoid circular reference
+const originalStdin = process.stdin
+const patchedStdin = originalStdin as any
+
+// Add missing methods that Ink expects
+patchedStdin.ref = mock(() => patchedStdin)
+patchedStdin.unref = mock(() => patchedStdin)
+patchedStdin.setRawMode = mock(() => patchedStdin)
+patchedStdin.setEncoding = mock(() => patchedStdin)
+patchedStdin.pause = mock(() => patchedStdin)
+patchedStdin.resume = mock(() => patchedStdin)
+patchedStdin.read = mock(() => null)
+patchedStdin.pipe = mock((destination: any) => destination)
+
+// Set TTY flag
+patchedStdin.isTTY = true
+
+// Ensure listenerCount method exists (used by ink-text-input)
+if (!patchedStdin.listenerCount) {
+  patchedStdin.listenerCount = mock((_eventName: string) => 0)
 }
 
-if (!process.stdin.unref) {
-  (process.stdin as any).unref = () => process.stdin;
+// Ensure removeListener exists and returns this for chaining
+if (!patchedStdin.removeListener) {
+  patchedStdin.removeListener = mock(
+    (_event: string, _listener: (...args: any[]) => any) => patchedStdin,
+  )
 }
 
-if (!process.stdin.setRawMode) {
-  (process.stdin as any).setRawMode = () => process.stdin;
+// Ensure off exists (alias for removeListener)
+if (!patchedStdin.off) {
+  patchedStdin.off = patchedStdin.removeListener
 }
 
-if (!process.stdin.isTTY) {
-  (process.stdin as any).isTTY = true;
-}
-
-// Mock setEncoding if not available
-if (!process.stdin.setEncoding) {
-  (process.stdin as any).setEncoding = () => process.stdin;
-}
+// Replace process.stdin with our patched version
+Object.defineProperty(process, 'stdin', {
+  value: patchedStdin,
+  writable: false,
+  configurable: true,
+})

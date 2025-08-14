@@ -1,31 +1,39 @@
 // InputProvider.tsx
-import React from 'react';
-import { inputManager } from './inputManager';
-import type { InputPrompt } from './types';
+import React from 'react'
+import { inputManager } from './inputManager'
+import type { InputPrompt } from './types'
 
 export function InputProvider({ children }: { children: React.ReactNode }) {
-  const [current, setCurrent] = React.useState<InputPrompt<any> | null>(null);
-  const [qLen, setQLen] = React.useState<number>(0);
+  const [current, setCurrent] = React.useState<InputPrompt<any> | null>(null)
+  const [qLen, setQLen] = React.useState<number>(0)
 
   React.useEffect(() => {
+    // Set initial state
+    setCurrent(inputManager.getCurrentPrompt())
+    setQLen(inputManager.getQueueLength())
+
+    // Subscribe to updates
     const unsubscribe = inputManager.subscribe(() => {
-      setCurrent(inputManager.getCurrentPrompt());
-      setQLen(inputManager.getQueueLength());
-    });
-    return unsubscribe;
-  }, []);
+      setCurrent(inputManager.getCurrentPrompt())
+      setQLen(inputManager.getQueueLength())
+    })
+    return unsubscribe
+  }, [])
 
-  const submit = React.useCallback((value: unknown) => {
-    if (current) inputManager.resolvePrompt(current.id, value);
-  }, [current]);
+  const submit = React.useCallback(
+    (value: unknown) => {
+      if (current) inputManager.resolvePrompt(current.id, value)
+    },
+    [current],
+  )
 
-  if (!current) return <>{children}</>;
+  if (!current) return <>{children}</>
 
-  const Renderer = inputManager.getRenderer(current.kind);
+  const Renderer = inputManager.getRenderer(current.kind)
   if (!Renderer) {
-    console.error(`No renderer for kind: ${current.kind}`);
-    inputManager.handleMissingRenderer(); // **advance queue** safely
-    return <>{children}</>;
+    console.error(`No renderer for kind: ${current.kind}`)
+    inputManager.handleMissingRenderer() // **advance queue** safely
+    return <>{children}</>
   }
 
   return (
@@ -38,5 +46,5 @@ export function InputProvider({ children }: { children: React.ReactNode }) {
         onCancel={() => submit(null)}
       />
     </>
-  );
+  )
 }

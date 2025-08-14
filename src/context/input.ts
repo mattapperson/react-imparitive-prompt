@@ -1,10 +1,10 @@
 // context/input.ts
-export { input, initInput, inputManager } from '../inputManager';
+export { initInput, input, inputManager } from '../inputManager'
 export type {
-  InputOptions,
   InputConfig,
+  InputEvents,
+  InputOptions,
+  InputPrompt,
   InputRenderer,
   RendererProps,
-  InputPrompt,
-  InputEvents,
-} from '../types';
+} from '../types'

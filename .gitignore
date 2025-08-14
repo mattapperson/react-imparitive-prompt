@@ -12,3 +12,5 @@ yarn-debug.log*
 yarn-error.log*
 .next
 .codanna
+# lsmcp cache and config
+.lsmcp/

@@ -1,5 +1,11 @@
 # React Imperative Prompt
 
+[![CI](https://github.com/mattapperson/react-imperative-prompt/actions/workflows/ci.yml/badge.svg)](https://github.com/mattapperson/react-imperative-prompt/actions/workflows/ci.yml)
+[![PR Checks](https://github.com/mattapperson/react-imperative-prompt/actions/workflows/pr-checks.yml/badge.svg)](https://github.com/mattapperson/react-imperative-prompt/actions/workflows/pr-checks.yml)
+[![Code Quality](https://github.com/mattapperson/react-imperative-prompt/actions/workflows/code-quality.yml/badge.svg)](https://github.com/mattapperson/react-imperative-prompt/actions/workflows/code-quality.yml)
+[![npm version](https://badge.fury.io/js/react-imperative-prompt.svg)](https://www.npmjs.com/package/react-imperative-prompt)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A platform-agnostic imperative prompt system for React applications. Call modal prompts imperatively using promises, similar to browser's `window.prompt()` but with full React component customization.
 
 ## ✨ Features
