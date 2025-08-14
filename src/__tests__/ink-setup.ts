@@ -21,12 +21,14 @@ patchedStdin.isTTY = true
 
 // Ensure listenerCount method exists (used by ink-text-input)
 if (!patchedStdin.listenerCount) {
-  patchedStdin.listenerCount = mock((eventName: string) => 0)
+  patchedStdin.listenerCount = mock((_eventName: string) => 0)
 }
 
 // Ensure removeListener exists and returns this for chaining
 if (!patchedStdin.removeListener) {
-  patchedStdin.removeListener = mock((event: string, listener: Function) => patchedStdin)
+  patchedStdin.removeListener = mock(
+    (_event: string, _listener: (...args: any[]) => any) => patchedStdin,
+  )
 }
 
 // Ensure off exists (alias for removeListener)
