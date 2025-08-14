@@ -2,11 +2,14 @@
 
 export { input } from './helpers' // Export enhanced input with convenience methods
 export { InputProvider } from './InputProvider'
-export { initInput, inputManager } from './inputManager'
+export { display, initInput, inputManager } from './inputManager'
 
 // Re-export types
 export type {
   BaseInputOptions,
+  DisplayHandle,
+  DisplayOptions,
+  DisplayPrompt,
   InputConfig,
   InputEvents,
   InputOptions,

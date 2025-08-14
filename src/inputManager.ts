@@ -1,5 +1,14 @@
 // inputManager.ts
-import type { InputConfig, InputEvents, InputOptions, InputPrompt, InputRenderer } from './types'
+import type {
+  DisplayHandle,
+  DisplayOptions,
+  DisplayPrompt,
+  InputConfig,
+  InputEvents,
+  InputOptions,
+  InputPrompt,
+  InputRenderer,
+} from './types'
 
 function uuid(): string {
   // SSR-safe
@@ -10,12 +19,20 @@ function uuid(): string {
   return Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)
 }
 
+interface DisplayState<V> {
+  prompt: DisplayPrompt<V>
+  values: V[]
+  subscribers: Set<(value: V) => void>
+  isCancelled: boolean
+}
+
 export class InputManager {
   private queue: Array<InputPrompt<any>> = []
   private currentPrompt: InputPrompt<any> | null = null
   private listeners: Set<() => void> = new Set()
   private eventListeners: Set<(evt: InputEvents) => void> = new Set()
   private config: InputConfig | null = null
+  private activeDisplays: Map<string, DisplayState<any>> = new Map()
 
   init(config: InputConfig) {
     if (!config.defaultRenderer) {
@@ -59,7 +76,7 @@ export class InputManager {
         try {
           originalResolve(value)
         } finally {
-          cleanup.forEach((fn) => fn())
+          for (const fn of cleanup) fn()
         }
       }
 
@@ -128,6 +145,134 @@ export class InputManager {
     return this.currentPrompt
   }
 
+  display<V = unknown>(options: DisplayOptions<V>): DisplayHandle<V> {
+    if (!this.config) {
+      throw new Error('InputManager.init() must be called first')
+    }
+
+    const id = uuid()
+    const prompt: DisplayPrompt<V> = {
+      ...options,
+      id,
+      type: 'display',
+      currentValue: options.initialValue,
+    }
+
+    const state: DisplayState<V> = {
+      prompt,
+      values: options.initialValue !== undefined ? [options.initialValue] : [],
+      subscribers: new Set(),
+      isCancelled: false,
+    }
+
+    this.activeDisplays.set(id, state)
+    this.emit({ type: 'display:started', id, kind: options.kind })
+    this.notify()
+
+    const submitted = this.createDisplayGenerator<V>(id, state)
+
+    const handle: DisplayHandle<V> = {
+      submitted,
+      id,
+      cancel: () => this.cancelDisplay(id),
+      update: (value: V) => this.updateDisplay(id, value),
+    }
+
+    return handle
+  }
+
+  private async *createDisplayGenerator<V>(
+    id: string,
+    state: DisplayState<V>,
+  ): AsyncGenerator<V, void, unknown> {
+    try {
+      // Yield initial value if present
+      if (state.values.length > 0) {
+        yield state.values.shift()!
+      }
+
+      // Create a promise-based queue for new values
+      while (!state.isCancelled) {
+        const value = await new Promise<V | symbol>((resolve) => {
+          // Check if already cancelled
+          if (state.isCancelled) {
+            resolve(Symbol.for('cancelled'))
+            return
+          }
+
+          // Check if there are buffered values
+          if (state.values.length > 0) {
+            const nextValue = state.values.shift()
+            if (nextValue !== undefined) {
+              resolve(nextValue)
+              return
+            }
+          }
+
+          // Subscribe to future values
+          const unsubscribe = (value: V) => {
+            state.subscribers.delete(unsubscribe)
+            resolve(value)
+          }
+          state.subscribers.add(unsubscribe)
+        })
+
+        // Check for cancellation signal
+        if (value === Symbol.for('cancelled')) {
+          break
+        }
+
+        yield value as V
+      }
+    } finally {
+      // Cleanup
+      this.activeDisplays.delete(id)
+      this.notify()
+    }
+  }
+
+  private updateDisplay<V>(id: string, value: V): void {
+    const state = this.activeDisplays.get(id) as DisplayState<V> | undefined
+    if (!state || state.isCancelled) return
+
+    state.prompt.currentValue = value
+
+    // Notify all waiting subscribers
+    if (state.subscribers.size > 0) {
+      const subscriber = state.subscribers.values().next().value
+      if (subscriber) {
+        subscriber(value)
+      }
+    } else {
+      // Buffer the value if no subscribers
+      state.values.push(value)
+    }
+
+    this.emit({ type: 'display:updated', id, value })
+    this.notify()
+  }
+
+  private cancelDisplay(id: string): void {
+    const state = this.activeDisplays.get(id)
+    if (!state) return
+
+    state.isCancelled = true
+
+    // Notify all subscribers with cancellation
+    for (const subscriber of state.subscribers) {
+      subscriber(Symbol.for('cancelled') as any)
+    }
+    state.subscribers.clear()
+
+    this.activeDisplays.delete(id)
+    this.emit({ type: 'display:canceled', id })
+    this.notify()
+  }
+
+  getActiveDisplays(): DisplayPrompt<any>[] {
+    return Array.from(this.activeDisplays.values()).map((state) => state.prompt)
+  }
+
   getQueueLength(): number {
     return this.queue.length
   }
@@ -189,14 +334,15 @@ export class InputManager {
   }
 
   private notify() {
-    this.listeners.forEach((l) => l())
+    for (const l of this.listeners) l()
   }
 
   private emit(evt: InputEvents) {
-    this.eventListeners.forEach((l) => l(evt))
+    for (const l of this.eventListeners) l(evt)
   }
 }
 
 export const inputManager = new InputManager()
 export const input = <V = string>(opts: InputOptions<V>) => inputManager.input<V>(opts)
+export const display = <V = unknown>(opts: DisplayOptions<V>) => inputManager.display<V>(opts)
 export const initInput = (config: InputConfig) => inputManager.init(config)
