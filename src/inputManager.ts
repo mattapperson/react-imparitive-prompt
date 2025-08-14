@@ -11,9 +11,7 @@ function uuid(): string {
 }
 
 export class InputManager {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private queue: Array<InputPrompt<any>> = []
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private currentPrompt: InputPrompt<any> | null = null
   private listeners: Set<() => void> = new Set()
   private eventListeners: Set<(evt: InputEvents) => void> = new Set()
@@ -126,7 +124,6 @@ export class InputManager {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getCurrentPrompt(): InputPrompt<any> | null {
     return this.currentPrompt
   }
@@ -135,7 +132,6 @@ export class InputManager {
     return this.queue.length
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getRenderer(kind?: string): InputRenderer<any> | null {
     if (!this.config) return null
     const key = kind ?? this.config.defaultRenderer

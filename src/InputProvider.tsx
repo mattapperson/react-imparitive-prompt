@@ -4,7 +4,6 @@ import { inputManager } from './inputManager'
 import type { InputPrompt } from './types'
 
 export function InputProvider({ children }: { children: React.ReactNode }) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [current, setCurrent] = React.useState<InputPrompt<any> | null>(null)
   const [qLen, setQLen] = React.useState<number>(0)
 

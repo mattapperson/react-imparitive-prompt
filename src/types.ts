@@ -32,7 +32,6 @@ export interface RendererProps<V> {
 export type InputRenderer<V = unknown> = React.ComponentType<RendererProps<V>>
 
 export interface InputRenderers {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: InputRenderer<any>
 }
 
