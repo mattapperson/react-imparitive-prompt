@@ -1,7 +1,7 @@
 // PromptInputRenderer.tsx
 import React from 'react'
 import { inputManager } from './inputManager'
-import type { InputPrompt, DisplayPrompt } from './types'
+import type { DisplayPrompt, InputPrompt } from './types'
 
 export interface PromptInputRendererProps {
   /** When true, renders all queued prompts. When false, only renders the current prompt */
