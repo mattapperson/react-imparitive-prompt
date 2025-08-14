@@ -12,7 +12,7 @@
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "delay": "^6.0.0",
-    "happy-dom": "^15.11.7",
+    "happy-dom": "^18.0.1",
     "ink": "5.0.1",
     "ink-testing-library": "3.0.0",
     "ink-text-input": "5.0.1",
