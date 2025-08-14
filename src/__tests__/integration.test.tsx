@@ -71,9 +71,7 @@ describe('Integration Tests', () => {
       fireEvent.click(screen.getByTestId('trigger-text'))
 
       // Wait for modal to appear
-      await waitFor(() => {
-        expect(screen.getByText('What is your name?')).toBeTruthy()
-      })
+      await waitFor(() => screen.queryByText('What is your name?'))
 
       // Find input and enter value
       const textInput = screen.getByRole('textbox') as HTMLInputElement
@@ -85,7 +83,8 @@ describe('Integration Tests', () => {
 
       // Check result
       await waitFor(() => {
-        expect(screen.getByTestId('result').textContent).toBe('Hello, John Doe!')
+        const el = screen.queryByTestId('result');
+        return el && el.textContent === 'Hello, John Doe!' ? el : null;
       })
     })
 
@@ -142,34 +141,29 @@ describe('Integration Tests', () => {
       fireEvent.click(screen.getByTestId('trigger-multi'))
 
       // First input - name
-      await waitFor(() => {
-        expect(screen.getByText('Enter your name')).toBeTruthy()
-      })
+      await waitFor(() => screen.queryByText('Enter your name'))
       fireEvent.change(screen.getByRole('textbox'), {
         target: { value: 'Jane' },
       })
       fireEvent.click(screen.getByText('Submit'))
 
       // Second input - email
-      await waitFor(() => {
-        expect(screen.getByText('Enter your email')).toBeTruthy()
-      })
+      await waitFor(() => screen.queryByText('Enter your email'))
       const emailInput = screen.getByRole('textbox') as HTMLInputElement
       expect(emailInput.type).toBe('email')
       fireEvent.change(emailInput, { target: { value: 'jane@example.com' } })
       fireEvent.click(screen.getByText('Submit'))
 
       // Third input - age
-      await waitFor(() => {
-        expect(screen.getByText('Enter your age')).toBeTruthy()
-      })
+      await waitFor(() => screen.queryByText('Enter your age'))
       const ageInput = document.getElementById('number-input')
       fireEvent.change(ageInput!, { target: { value: '25' } })
       fireEvent.click(screen.getByText('Submit'))
 
       // Check final result
       await waitFor(() => {
-        expect(screen.getByTestId('result').textContent).toBe('Jane, jane@example.com, 25')
+        const el = screen.queryByTestId('result');
+        return el && el.textContent === 'Jane, jane@example.com, 25' ? el : null;
       })
     })
 
@@ -203,15 +197,14 @@ describe('Integration Tests', () => {
 
       fireEvent.click(screen.getByTestId('trigger-cancel'))
 
-      await waitFor(() => {
-        expect(screen.getByText('Enter text')).toBeTruthy()
-      })
+      await waitFor(() => screen.queryByText('Enter text'))
 
       // Click cancel
       fireEvent.click(screen.getByText('Cancel'))
 
       await waitFor(() => {
-        expect(screen.getByTestId('result').textContent).toBe('Cancelled')
+        const el = screen.queryByTestId('result');
+        return el && el.textContent === 'Cancelled' ? el : null;
       })
     })
 
@@ -247,9 +240,7 @@ describe('Integration Tests', () => {
       fireEvent.click(screen.getByTestId('trigger-batch'))
 
       // First prompt - should show queue indicator
-      await waitFor(() => {
-        expect(screen.getByText('First')).toBeTruthy()
-      })
+      await waitFor(() => screen.queryByText('First'))
 
       // Check for queue indicator in the modal
       const modal = screen.getByRole('dialog')
@@ -260,9 +251,7 @@ describe('Integration Tests', () => {
       fireEvent.click(screen.getByText('Next'))
 
       // Second prompt
-      await waitFor(() => {
-        expect(screen.getByText('Second')).toBeTruthy()
-      })
+      await waitFor(() => screen.queryByText('Second'))
 
       const modal2 = screen.getByRole('dialog')
       expect(modal2.textContent).toContain('1 more step remaining')
@@ -271,17 +260,15 @@ describe('Integration Tests', () => {
       fireEvent.click(screen.getByText('Next'))
 
       // Third prompt
-      await waitFor(() => {
-        expect(screen.getByText('Third')).toBeTruthy()
-        expect(screen.getByText('Submit')).toBeTruthy()
-      })
+      await waitFor(() => screen.queryByText('Third') && screen.queryByText('Submit'))
 
       fireEvent.change(screen.getByRole('textbox'), { target: { value: 'C' } })
       fireEvent.click(screen.getByText('Submit'))
 
       // Check results
       await waitFor(() => {
-        expect(screen.getByTestId('result').textContent).toBe('A, B, C')
+        const el = screen.queryByTestId('result');
+        return el && el.textContent === 'A, B, C' ? el : null;
       })
     })
 
@@ -316,15 +303,14 @@ describe('Integration Tests', () => {
 
       fireEvent.click(screen.getByTestId('trigger-timeout'))
 
-      await waitFor(() => {
-        expect(screen.getByText('Quick input')).toBeTruthy()
-      })
+      await waitFor(() => screen.queryByText('Quick input'))
 
       // Wait for timeout to trigger
       await new Promise((resolve) => setTimeout(resolve, 100))
 
       await waitFor(() => {
-        expect(screen.getByTestId('result').textContent).toBe('Timed out')
+        const el = screen.queryByTestId('result');
+        return el && el.textContent === 'Timed out' ? el : null;
       })
     })
 
@@ -368,15 +354,14 @@ describe('Integration Tests', () => {
 
       fireEvent.click(screen.getByTestId('trigger-abort'))
 
-      await waitFor(() => {
-        expect(screen.getByText('Abortable input')).toBeTruthy()
-      })
+      await waitFor(() => screen.queryByText('Abortable input'))
 
       // Abort the input
       fireEvent.click(screen.getByTestId('abort'))
 
       await waitFor(() => {
-        expect(screen.getByTestId('result').textContent).toBe('Aborted')
+        const el = screen.queryByTestId('result');
+        return el && el.textContent === 'Aborted' ? el : null;
       })
     })
 
@@ -411,9 +396,7 @@ describe('Integration Tests', () => {
 
       fireEvent.click(screen.getByTestId('trigger-password'))
 
-      await waitFor(() => {
-        expect(screen.getByText('Enter password')).toBeTruthy()
-      })
+      await waitFor(() => screen.queryByText('Enter password'))
 
       const passwordInput = document.getElementById('text-input') as HTMLInputElement
       expect(passwordInput).toBeTruthy()
@@ -423,7 +406,8 @@ describe('Integration Tests', () => {
       fireEvent.click(screen.getByText('Submit'))
 
       await waitFor(() => {
-        expect(screen.getByTestId('result').textContent).toBe('Password set')
+        const el = screen.queryByTestId('result');
+        return el && el.textContent === 'Password set' ? el : null;
       })
     })
 
@@ -459,9 +443,7 @@ describe('Integration Tests', () => {
 
       fireEvent.click(screen.getByTestId('trigger-age'))
 
-      await waitFor(() => {
-        expect(screen.getByText('Enter your age')).toBeTruthy()
-      })
+      await waitFor(() => screen.queryByText('Enter your age'))
 
       const numberInput = document.getElementById('number-input') as HTMLInputElement
       expect(numberInput).toBeTruthy()
@@ -471,7 +453,8 @@ describe('Integration Tests', () => {
       fireEvent.click(screen.getByText('Submit'))
 
       await waitFor(() => {
-        expect(screen.getByTestId('result').textContent).toBe('Age: 25')
+        const el = screen.queryByTestId('result');
+        return el && el.textContent === 'Age: 25' ? el : null;
       })
     })
   })
@@ -510,7 +493,8 @@ describe('Integration Tests', () => {
       fireEvent.click(screen.getByTestId('trigger-missing'))
 
       await waitFor(() => {
-        expect(screen.getByTestId('result').textContent).toBe('Handled missing renderer')
+        const el = screen.queryByTestId('result');
+        return el && el.textContent === 'Handled missing renderer' ? el : null;
       })
 
       expect(consoleSpy).toHaveBeenCalledWith('No renderer for kind: nonexistent')

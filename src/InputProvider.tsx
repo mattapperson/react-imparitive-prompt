@@ -8,6 +8,11 @@ export function InputProvider({ children }: { children: React.ReactNode }) {
   const [qLen, setQLen] = React.useState<number>(0)
 
   React.useEffect(() => {
+    // Set initial state
+    setCurrent(inputManager.getCurrentPrompt())
+    setQLen(inputManager.getQueueLength())
+    
+    // Subscribe to updates
     const unsubscribe = inputManager.subscribe(() => {
       setCurrent(inputManager.getCurrentPrompt())
       setQLen(inputManager.getQueueLength())

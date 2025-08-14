@@ -1,32 +1,28 @@
 // Setup for Ink tests - mocks stdin methods required by ink-text-input
+import { EventEmitter } from 'events'
+import { mock } from 'bun:test'
 
-// Use type assertion instead of interface extending to avoid conflicts
-const stdin = process.stdin as NodeJS.ReadStream & {
-  ref?: () => NodeJS.ReadStream
-  unref?: () => NodeJS.ReadStream
-  setRawMode?: (mode: boolean) => NodeJS.ReadStream
-  isTTY?: boolean
-  setEncoding?: (encoding: BufferEncoding) => NodeJS.ReadStream
+// Create a mock stdin that extends EventEmitter
+class MockStdin extends EventEmitter {
+  ref = mock(() => this)
+  unref = mock(() => this)
+  setRawMode = mock(() => this)
+  setEncoding = mock(() => this)
+  pause = mock(() => this)
+  resume = mock(() => this)
+  read = mock(() => null)
+  isTTY = true
+  
+  // Add pipe method
+  pipe = mock((destination: any) => destination)
 }
 
-// Create proper stdin mocks
-if (!stdin.ref) {
-  stdin.ref = () => process.stdin
-}
+// Create and configure the mock stdin instance
+const mockStdin = new MockStdin()
 
-if (!stdin.unref) {
-  stdin.unref = () => process.stdin
-}
-
-if (!stdin.setRawMode) {
-  stdin.setRawMode = () => process.stdin
-}
-
-if (!stdin.isTTY) {
-  stdin.isTTY = true
-}
-
-// Mock setEncoding if not available
-if (!stdin.setEncoding) {
-  stdin.setEncoding = () => process.stdin
-}
+// Override process.stdin with our mock
+Object.defineProperty(process, 'stdin', {
+  value: mockStdin,
+  writable: true,
+  configurable: true
+})

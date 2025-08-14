@@ -93,11 +93,11 @@ describe('InputProvider', () => {
     // Trigger a prompt
     inputManager.input({ message: 'Test Message', kind: 'test' })
 
-    await waitFor(() => {
-      expect(screen.getByTestId('test-renderer')).toBeTruthy()
-      expect(screen.getByTestId('message').textContent).toBe('Test Message')
-      expect(screen.getByTestId('child')).toBeTruthy() // Children still rendered
-    })
+    await waitFor(() => screen.queryByTestId('test-renderer'))
+    
+    expect(screen.getByTestId('test-renderer')).toBeTruthy()
+    expect(screen.getByTestId('message').textContent).toBe('Test Message')
+    expect(screen.getByTestId('child')).toBeTruthy() // Children still rendered
   })
 
   it('should update queue length', async () => {
@@ -112,9 +112,9 @@ describe('InputProvider', () => {
     inputManager.input({ message: 'Second' })
     inputManager.input({ message: 'Third' })
 
-    await waitFor(() => {
-      expect(screen.getByTestId('queue-length').textContent).toBe('2')
-    })
+    await waitFor(() => screen.queryByTestId('queue-length'))
+    
+    expect(screen.getByTestId('queue-length').textContent).toBe('2')
   })
 
   it('should handle submit', async () => {
@@ -126,18 +126,16 @@ describe('InputProvider', () => {
 
     const promise = inputManager.input({ message: 'Test' })
 
-    await waitFor(() => {
-      expect(screen.getByTestId('test-renderer')).toBeTruthy()
-    })
+    await waitFor(() => screen.queryByTestId('test-renderer'))
 
     fireEvent.click(screen.getByTestId('submit'))
 
     const result = await promise
     expect(result).toBe('test-value')
 
-    await waitFor(() => {
-      expect(screen.queryByTestId('test-renderer')).toBeNull()
-    })
+    await waitFor(() => !screen.queryByTestId('test-renderer'))
+    
+    expect(screen.queryByTestId('test-renderer')).toBeNull()
   })
 
   it('should handle cancel', async () => {
@@ -149,18 +147,16 @@ describe('InputProvider', () => {
 
     const promise = inputManager.input({ message: 'Test' })
 
-    await waitFor(() => {
-      expect(screen.getByTestId('test-renderer')).toBeTruthy()
-    })
+    await waitFor(() => screen.queryByTestId('test-renderer'))
 
     fireEvent.click(screen.getByTestId('cancel'))
 
     const result = await promise
     expect(result).toBeNull()
 
-    await waitFor(() => {
-      expect(screen.queryByTestId('test-renderer')).toBeNull()
-    })
+    await waitFor(() => !screen.queryByTestId('test-renderer'))
+    
+    expect(screen.queryByTestId('test-renderer')).toBeNull()
   })
 
   it('should handle missing renderer', async () => {
@@ -174,11 +170,12 @@ describe('InputProvider', () => {
 
     const promise = inputManager.input({ message: 'Test', kind: 'missing' })
 
-    await waitFor(() => {
-      expect(consoleSpy).toHaveBeenCalledWith('No renderer for kind: missing')
-      expect(screen.queryByTestId('test-renderer')).toBeNull()
-      expect(screen.getByTestId('child')).toBeTruthy()
-    })
+    // Wait a moment for the component to process
+    await new Promise(resolve => setTimeout(resolve, 100))
+    
+    expect(consoleSpy).toHaveBeenCalledWith('No renderer for kind: missing')
+    expect(screen.queryByTestId('test-renderer')).toBeNull()
+    expect(screen.getByTestId('child')).toBeTruthy()
 
     const result = await promise
     expect(result).toBeNull()
@@ -196,23 +193,24 @@ describe('InputProvider', () => {
     const promise1 = inputManager.input({ message: 'First' })
     const promise2 = inputManager.input({ message: 'Second' })
 
-    await waitFor(() => {
-      expect(screen.getByTestId('message').textContent).toBe('First')
-    })
+    await waitFor(() => screen.queryByTestId('message'))
+    expect(screen.getByTestId('message').textContent).toBe('First')
 
     fireEvent.click(screen.getByTestId('submit'))
     await promise1
 
     await waitFor(() => {
-      expect(screen.getByTestId('message').textContent).toBe('Second')
+      const msg = screen.queryByTestId('message')
+      return msg && msg.textContent === 'Second' ? msg : null
     })
+    expect(screen.getByTestId('message').textContent).toBe('Second')
 
     fireEvent.click(screen.getByTestId('submit'))
     await promise2
 
-    await waitFor(() => {
-      expect(screen.queryByTestId('test-renderer')).toBeNull()
-    })
+    await waitFor(() => !screen.queryByTestId('test-renderer'))
+    
+    expect(screen.queryByTestId('test-renderer')).toBeNull()
   })
 
   it('should cleanup subscription on unmount', async () => {
@@ -278,10 +276,10 @@ describe('InputProvider', () => {
     // Use default renderer (no kind specified)
     const promise = inputManager.input({ message: 'Default Test' })
 
-    await waitFor(() => {
-      expect(screen.getByTestId('test-renderer')).toBeTruthy()
-      expect(screen.getByTestId('message').textContent).toBe('Default Test')
-    })
+    await waitFor(() => screen.queryByTestId('test-renderer'))
+    
+    expect(screen.getByTestId('test-renderer')).toBeTruthy()
+    expect(screen.getByTestId('message').textContent).toBe('Default Test')
 
     fireEvent.click(screen.getByTestId('submit'))
     const result = await promise
@@ -297,9 +295,8 @@ describe('InputProvider', () => {
 
     const promise1 = inputManager.input({ message: 'First' })
 
-    await waitFor(() => {
-      expect(screen.getByTestId('message').textContent).toBe('First')
-    })
+    await waitFor(() => screen.queryByTestId('message'))
+    expect(screen.getByTestId('message').textContent).toBe('First')
 
     // Click submit for first prompt
     fireEvent.click(screen.getByTestId('submit'))
@@ -310,8 +307,10 @@ describe('InputProvider', () => {
     const promise2 = inputManager.input({ message: 'Second' })
 
     await waitFor(() => {
-      expect(screen.getByTestId('message').textContent).toBe('Second')
+      const msg = screen.queryByTestId('message')
+      return msg && msg.textContent === 'Second' ? msg : null
     })
+    expect(screen.getByTestId('message').textContent).toBe('Second')
 
     fireEvent.click(screen.getByTestId('submit'))
     const result2 = await promise2
