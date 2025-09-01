@@ -9,7 +9,7 @@
     "@happy-dom/global-registrator": "^15.11.7",
     "@testing-library/react": "^16.1.0",
     "@types/bun": "^1.1.14",
-    "@types/react": "^18.2.0",
+    "@types/react": "^19.1.12",
     "@types/react-dom": "^18.2.0",
     "delay": "^6.0.0",
     "happy-dom": "^15.11.7",
