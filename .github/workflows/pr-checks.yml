@@ -64,7 +64,7 @@ jobs:
           
       - name: Comment PR on failure
         if: failure()
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const message = `## ❌ Code Quality Check Failed
@@ -181,7 +181,7 @@ jobs:
     
     steps:
       - name: PR Status Summary
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const jobs = ${{ toJson(needs) }};
